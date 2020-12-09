@@ -72,7 +72,7 @@ At a high level, here is a tentative and non-exhaustive list of aspects that we 
 
  - Requirements to define expected behavior: “a TPPP must hide the IP address of the prefetch requester”, what data can be logged, retention policy for those logs, etc.
  - Usage rules (e.g. abuse prevention).
- - Audits to assert that a TPPP is implementing the requirements and usage rules as specified.
+ - Potentially audits to assert that a TPPP is implementing the requirements and usage rules as specified.
 
 
 ## Other concerns or questions?
