@@ -63,6 +63,15 @@ To protect against attackers using the proxy to abuse websites, the prefetch pro
 
 We’re also considering potential schemes for authentication, as well as mechanisms by which website operators can opt-out of proxied prefetching (e.g., rejecting requests with the “Purpose: prefetch” header and potentially a blanket opt-out expressed in the DNS record). In addition, private prefetch proxies should allow for reverse DNS lookups of their IP addresses and publish an escalation path for help addressing potential abuse concerns. 
 
+## Geolocation
+**Concern:** "How will this work with geography based used case (e.g. Geo-filtering / Geo-access)?"
+
+The destination server will see the IP of the proxy egress IP, not the user's IP; this will interfere with IP-based geolocation. 
+Servers that rely on geolocation to determine what content to serve have the following options:
+* Determine the location of the user at navigation time, e.g., by triggering a request via JS.
+* Reject requests with the "Purpose: prefetch" for resources that are georestricted.
+
+
 ## Trusted Private Prefetch Proxies (TPPP)
 **Question**: “What are ‘trusted private prefetch proxies’?”
 
