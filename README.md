@@ -69,7 +69,7 @@ We’re also considering potential schemes for authentication, as well as mechan
 The destination server will see the IP of the proxy egress IP, not the user's IP; this will interfere with IP-based geolocation. 
 Servers that rely on geolocation to determine what content to serve have the following options:
 * Determine the location of the user at navigation time, e.g., by triggering a request via JS.
-* Reject requests with the "Purpose: prefetch" for resources that are georestricted.
+* Reject requests with the "Purpose: prefetch" header for resources that are georestricted.
 
 ## Trusted Private Prefetch Proxies (TPPP)
 **Question**: “What are ‘trusted private prefetch proxies’?”
