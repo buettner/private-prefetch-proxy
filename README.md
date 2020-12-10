@@ -71,6 +71,10 @@ Servers that rely on geolocation to determine what content to serve have the fol
 * Determine the location of the user at navigation time, e.g., by triggering a request via JS.
 * Reject requests with the "Purpose: prefetch" header for resources that are georestricted.
 
+More speculative ideas worth exploring are:
+* Requiring proxies to only egress traffic from IPs in the same country/region as the user. The challenge here is having agreement on the granularity of "region", as proxies likely can't egress in every country.
+* APIs/mechanism by which the proxy can tell the destination what general region the user is in. Similar to the above, there would need to be agreement about the required granularity.
+
 ## Trusted Private Prefetch Proxies (TPPP)
 **Question**: “What are ‘trusted private prefetch proxies’?”
 
