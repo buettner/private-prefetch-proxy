@@ -78,7 +78,7 @@ More speculative ideas worth exploring are:
 ## Traffic analysis
 **Question**: "Even though prefetches are end-to-end encrypted between the browser and the destination, can't the proxy perform traffic analysis attacks?"
 
-Prefetches should not reveal any local state to the destination that could be used to identify the user. This means that the responses cannot be personalized. The proxy could learn, for example, that the destination runs A/B experiments on non-logged in users. But we don't believe this information is particularly valuable, and the destination can always reject prefetch requests. 
+[By design](https://github.com/buettner/private-prefetch-proxy#using-an-isolated-network-context), prefetches should not reveal any local state to the destination that could be used to identify the user. This means that the responses cannot be personalized. The proxy could learn, for example, that the destination runs A/B experiments on non-logged in users. But we don't believe this information is particularly valuable, and the destination can always reject prefetch requests. 
 
 ## Trusted Private Prefetch Proxies (TPPP)
 **Question**: “What are ‘trusted private prefetch proxies’?”
