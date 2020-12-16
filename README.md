@@ -89,6 +89,11 @@ More speculative ideas worth exploring are:
 * Requiring proxies to only egress traffic from IPs in the same country/region as the user. The challenge here is having agreement on the granularity of "region", as proxies likely can't egress in every country.
 * APIs/mechanism by which the proxy can tell the destination what general region the user is in. Similar to the above, there would need to be agreement about the required granularity.
 
+## Traffic analysis
+**Question**: "Even though prefetches are end-to-end encrypted between the browser and the destination, can't the proxy perform traffic analysis attacks?"
+
+[By design](https://github.com/buettner/private-prefetch-proxy#using-an-isolated-network-context), prefetches should not reveal any local state to the destination that could be used to identify the user. This means that the responses cannot be personalized. The proxy could learn, for example, that the destination runs A/B experiments on non-logged in users. But we don't believe this information is particularly valuable, and the destination can always reject prefetch requests. 
+
 ## Trusted Private Prefetch Proxies (TPPP)
 **Question**: “What are ‘trusted private prefetch proxies’?”
 
