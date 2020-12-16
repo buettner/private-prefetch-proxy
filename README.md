@@ -16,6 +16,20 @@ We want to make it easy for sites to take advantage of cross-origin prefetching 
 ## Non-goals
 This proposal is only relevant for the cross-origin cases. For same-origin prefetching/prerendering, there is no need to hide the user’s IP address or other state. Indeed, the party triggering prefetch/prerender is the same party that is being prefetched/prerendered, and naturally has access to said information. While same-origin prefetch/prerendering are out-of-scope of this explainer, we are nevertheless interested in improving prefetching/prerendering for both cross-origin and same-origin scenarios through other efforts.
 
+## Prefetching Details
+### Using an isolated network context
+Prefetches should not reveal any local state that can be used to identify the user. The CONNECT proxy masks the IP address, but the browser is responsible for not revealing other information that can be used to identify the user. 
+
+Specifically:
+* Cookies must not be sent on prefetches.
+* Prefetches must use an isolated network context that does not reveal state from the HTTP cache, previous TLS sessions, etc.
+* Static fingerprinting surfaces such as User-Agent must be bucketed, e.g., only specifiying the major version of the browser.
+
+In addition, prefetches should not persist any state (cookies, HTTP caching) unless the user navigates to the prefetched link. 
+
+### What to prefetch
+Our experiment found that fetching the mainframe HTML, along with statically linked CSS and synchronous Javascript, provided a 40% LCP improvement at the median. Fetching other resources, for example images, may further improve user experience at the cost of more wasted bytes on mispredictions. All prefetches carry the "Purpose: prefetch" header so origins can identify them. 
+
 # FAQ
 ## TLS key leaks and private prefetch proxies
 
