@@ -16,6 +16,19 @@ We want to make it easy for sites to take advantage of cross-origin prefetching 
 ## Non-goals
 This proposal is only relevant for the cross-origin cases. For same-origin prefetching/prerendering, there is no need to hide the user’s IP address or other state. Indeed, the party triggering prefetch/prerender is the same party that is being prefetched/prerendered, and naturally has access to said information. While same-origin prefetch/prerendering are out-of-scope of this explainer, we are nevertheless interested in improving prefetching/prerendering for both cross-origin and same-origin scenarios through other efforts.
 
+## Challenges
+There are two primary concerns we see with prefetch proxies. The first is that they can amplify the impact of compromised TLS certificates. Today, an attacker must have a compromised TLS certificate and also be on the network path between the user and that origin to MITM the connection. If attackers can designate and run prefetch proxies, they can trivially put themselves on the network path. A related concern is collusion, where a prefetch proxy works with some destinations to selectively unblind requests.
+
+Today, there are no technical means by which a browser can verify that a CONNECT proxy is not MITMing the client->origin TLS connection. While confidential computing technology may allow the browser to verify exactly what code is being run by the proxy, the technology is in its infancy. 
+
+The second concern is that the proxy may become an aggregation point for user data. The set of links shown to a user on a referring site is both business data of the referrer and potentially PII for the user (e.g., if they are logged into the referring site). Of course, browsers see links on referrer pages today, but most browsers do not make that data available to backend infrastructure. Prefetch proxies should not build profiles of users or referring sites.
+
+This leads to the core challenge of making this feature available to as much of the web as possible while:
+1. Giving users and referrers control over who they trust with their data.
+1. Giving publishers the ability to opt-out of the feature.
+1. Giving browsers the ability to ensure that prefetch proxies do not put their users at risk of TLS attacks or tracking.
+
+
 ## Prefetching Details
 ### Using an isolated network context
 Prefetches should not reveal any local state that can be used to identify the user. The CONNECT proxy masks the IP address, but the browser is responsible for not revealing other information that can be used to identify the user. 
