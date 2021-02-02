@@ -9,7 +9,6 @@ Most of these concerns can be addressed with changes at the browser, e.g,. not s
 
 To make it easier to achieve instant experiences on the web, we’re exploring an alternative design for privacy-preserving prefetch as described [in this blog post](https://blog.chromium.org/2020/12/continuing-our-journey-to-bring-instant.html). Key to the proposal is the use of an HTTP/2 CONNECT proxy to obfuscate the IP address from the destination site during prefetching, along with rules governing its usage and additional measures to ensure that the prefetches cannot be linked to the user.
 
-
 ## Goals
 We want to make it easy for sites to take advantage of cross-origin prefetching without revealing the user’s IP address to the destination. We propose using an HTTP/2 CONNECT proxy to obfuscate the user’s IP during prefetching to achieve this goal, while at the same time maintaining the security properties of the web and giving both users and websites control over the use of the proxy.
 
@@ -27,6 +26,58 @@ This leads to the core challenge of making this feature available to as much of 
 1. Giving users and referrers control over who they trust with their data.
 1. Giving publishers the ability to opt-out of the feature.
 1. Giving browsers the ability to ensure that prefetch proxies do not put their users at risk of TLS attacks or tracking.
+
+## Exploration
+In the interest of starting a discussion with the community, we are sharing a tentative plan for making privacy-preserving prefetching more accessible and appealing to a broad set of parties. We would [love to hear](https://github.com/buettner/private-prefetch-proxy/issues) your questions, concerns and feedback to refine our thinking!
+
+### Browser
+A key responsibility of a browser is to ensure the safety of its users. As noted in the [Challenges](https://github.com/buettner/private-prefetch-proxy#challenges) section, the primary concern with private prefetch proxies is that they introduce safety risks which the browser can not sufficiently address with currently available technology. Until this gap is resolved, it follows that the browser should only use  a private prefetch proxy that it implicitly trusts, either because it is  operated by the browser vendor itself, or by a third party under a contract (i.e. similar to the approach taken with DoH and VPN features by some browser vendors).
+
+### Referrers and users
+Outgoing links on a referring page may be the result of information the referrer knows about the user.  Consequently, outgoing links should not be prefetched, even with privacy preserving guarantees, without at least one of those two parties’ consent  (and the other party should be able to opt-out). 
+
+### Publishers
+Some publishers may not be comfortable with proxied prefetches even if the referrer, user and browser all are. A publisher’s level of comfort might depend on: the browser (and which proxy by association), user related characteristics (e.g. geo restrictions), or perhaps the ability of a given referrer to balance performance and data usage. We would love input on other potential concerns to help us prioritize refinements. Please [**share concrete details as to why**](https://github.com/buettner/private-prefetch-proxy/issues) a particular aspect matters to you.
+
+### Participation model
+We believe that a referrer opt-in combined with opt-outs for users and publishers provides the best value and flexibility to all parties involved:
+ * Referrers can choose to opt-in if they believe the benefits are worth it.
+ * Both users and publishers can choose to opt-out if they are uncomfortable with the feature (e.g. concerned about extra data usage).
+
+#### Referrer opt-in
+Referrers opt-in to the feature by indicating which links should be prefetched. Tentatively, we suggest the following approach built on top of a minimal subset of the speculation rules from the [Alternate Loading Modes](https://github.com/jeremyroman/alternate-loading-modes/blob/main/triggers.md) proposal:
+
+```html
+<script type="speculationrules">
+{
+  "prefetch": [
+    {"source": "list",
+     "urls": ["https://whizbang.example/bestof2020.html"],
+     "requires": ["anonymous-client-ip"]}
+  ]
+}
+</script>
+```
+
+Where:
+  - `urls` would contain a list of URLs the referrer believes to be good candidates for prefetching. The browser would consider this list for prefetching, in addition to  other constraints (e.g. bandwidth, prioritizing the main user experience, user preferences, etc).
+ - `requires": ["anonymous-client-ip"]` indicates that the referrer wants the cross origin prefetches to be done in a privacy preserving manner.
+
+
+#### User opt-out
+Users can opt-out of the feature at any time. Furthermore, users can temporarily opt-out of the feature by using their browser’s private browsing mode.
+
+#### Publisher opt-out
+We suggest the following approach for origin-wide opt-out:
+* Publishers specify in their DNS entry that they are opting out of proxied prefetching (completely or with some TBD granularity if necessary). 
+* The check would be done by the proxy for privacy reasons;  issuing a DNS request from the browser before navigation would share prefetch information with the DNS resolver and potentially the target host. Efforts in the DNS space (e.g. [Oblivious DNS](https://tools.ietf.org/html/draft-pauly-dprive-oblivious-doh-03)) would enable private DNS resolution before navigation.
+
+In addition, publishers can opt-out for individual requests, for example,  when dealing with temporary traffic spikes or other issues. For these, publishers should look for the `Purpose: prefetch` request header and reject requests accordingly (see [Geolocation](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
+
+### Future opportunities
+We’re continuing to explore ways to safely prefetch via proxies not operated by the browser. In that case, referrers may wish to specify which (if any) proxies they trust with their user data. The *speculation rules* approach offers a flexible pattern which would allow for this extension.
+
+If you have ideas on future opportunities or want to suggest a different approach, please [start a topic](https://github.com/buettner/private-prefetch-proxy/issues). Thanks!
 
 
 ## Prefetching Details
