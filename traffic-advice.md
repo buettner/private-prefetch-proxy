@@ -6,6 +6,13 @@ We propose a well-known "traffic advice" resource, analogous to `/robots.txt` (f
 
 ## Proposal
 
+HTTP request activity can broadly be divided into:
+* activity on behalf of a user interaction (e.g., a web browser a web page requested by the user), or which for another reason cannot easily be discarded
+* activity for which there is an existing specialized mechanism for throttling traffic (e.g. web crawlers respecting `robots.txt`)
+* activity which can easily be discarded (e.g., because it corresponds to a prefetch which improves loading performance but not correctness) at the server's request (e.g., because it is under load or the operator otherwise does not wish to serve non-essential traffic)
+
+Applications in the third category should consider acting as *agents which respect traffic advice*, so as to respect the server operator's wishes with a minimum resource impact.
+
 Agents which respect traffic advice should fetch the well-known path `/.well-known/traffic-advice.json`. If it returns a `200 OK` response with the `application/json` MIME type, the response body should contain valid JSON like the following:
 
 ```json
