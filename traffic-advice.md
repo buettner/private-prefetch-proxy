@@ -22,7 +22,7 @@ Agents which respect traffic advice should fetch the well-known path `/.well-kno
 ```
 
 Each agent has a series of identifiers it recognizes, in order of specificity:
-* its own agent name
+* its own agent name (e.g. `"ExamplePrivatePrefetchProxy"`)
 * decreasingly specific generic categories that describe it, like `"prefetch-proxy"`
 * `"*"` (which applies to every implementing agent)
 
@@ -42,6 +42,6 @@ A more similar textual format would be possible, but the format for parsing `rob
 
 For example, suppose a private prefetch proxy, `ExamplePrivatePrefetchProxy`, would like to respect traffic advice in order to allow site owners to limit inbound traffic from the proxy.
 
-When a client of the proxy service requests a connection to `https://www.example.com`, the proxy server issues an HTTP request for `https://www.example.com/.well-known/traffic-advice`. It receives the sample response body from above. It recognizes `"prefetch-proxy"` as the most specific advice to apply to itself.
+When a client of the proxy service (e.g., a web browser) requests a connection to `https://www.example.com`, the proxy server issues an HTTP request for `https://www.example.com/.well-known/traffic-advice`. It receives the sample response body from above. It recognizes `"prefetch-proxy"` as the most specific advice to apply to itself.
 
 It caches this result (traffic is presently disallowed) at the proxy server (or even across multiple proxy server instances run by the same operator), and refuses client connections to `https://www.example.com` until an updated `/.well-known/traffic-advice` resource no longer disallows traffic. Even if a large number of proxy clients request connections to `https://www.example.com`, the site operator and its CDN do not receive traffic from the proxy except for infrequent requests to revalidate the traffic advice (which may be, for example, once per hour).
