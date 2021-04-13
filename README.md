@@ -68,11 +68,11 @@ Where:
 Users can opt-out of the feature at any time. Furthermore, users can temporarily opt-out of the feature by using their browser’s private browsing mode.
 
 #### Publisher opt-out
-One option for origin-wide opt-out is to leverage the publisher's DNS record:
+Publishers can opt out by disallowing connections in their [traffic advice](traffic-advice.md). This advice would be fetched and cached by the proxy, and can be used by publishers by adding a single resource to their origin at a well-known path.
+
+Another option for origin-wide opt-out is to leverage the publisher's DNS record:
 * Publishers specify in their DNS entry that they are opting out of proxied prefetching (completely or with some TBD granularity if necessary). 
 * The DNS check would be done by the proxy for privacy reasons;  issuing a DNS request from the browser before navigation would share prefetch information with the DNS resolver and potentially the target host. 
-
-Alternatively (or in addition), we could define a [/.well-known URL](https://tools.ietf.org/html/rfc5785) that can be used for publisher opt-out, and this URL would be fetched and cached by the proxy. This has the advantage that it is easier for developers to add a new resource than to modify their DNS record. 
 
 Ideally, the browser would fetch the opt-out signal *before* making a connection to the proxy. While there are proposals to enable anonymous fetching of both DNS records ([Oblivious DNS](https://tools.ietf.org/html/draft-pauly-dprive-oblivious-doh-00)) and HTTP resources ([Oblivious HTTP](https://tools.ietf.org/html/draft-thomson-http-oblivious-00)), neither is well-supported yet. If either of those proposals gains traction, we may want to revisit the publisher opt-out design to take advantage of Oblivous fetching.
 
