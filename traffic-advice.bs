@@ -171,7 +171,7 @@ To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent iden
 
     1.  If |identity| does not contain |agentSelector|, then [=iteration/continue=].
 
-    1.  If |bestMatch| is null or |agentSelector| appears at an earlier index in |identity| than |bestMatch|[`"user_agent"`], then set |bestMatch| to |entry|.
+    1.  If |bestMatch| is null or |agentSelector| appears at an earlier index in |identity| than |bestMatch|[`"user_agent"`] does, then set |bestMatch| to |entry|.
 
 1.  If |bestMatch| is null, then return null.
 
