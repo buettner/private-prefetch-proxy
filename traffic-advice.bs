@@ -178,20 +178,16 @@ To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent iden
 
 </section>
 
-<section class="non-normative">
 Interpretation {#interpretation}
 ================================
 
-*This section is non-normative.*
+When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] should [=fetch traffic advice=] (respecting HTTP caching semantics).
 
-When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] [=fetch traffic advice=] (respecting HTTP caching semantics).
+If the result is null, then no advice was received. Agents should adopt their default behavior.
 
-If the result is null, then no advice was received. Agents adopt their default behavior.
+If the result is `"unreachable"`, then the HTTP server was not able to service the request for traffic advice. Since this could indicate that the server cannot accept additional requests at this time, agents may stop traffic to the server for some interval.
 
-If the result is `"unreachable"`, then the HTTP server was not able to service the request for traffic advice. Since this could indicate that the server cannot accept additional requests at this time, agents might stop traffic to the server for some interval.
-
-If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic is discouraged at this time. Agents might respect this by not establishing new connections or sending new requests.
-</section>
+If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic is discouraged at this time. Agents should respect this by not establishing new connections or sending new requests.
 
 Privacy and security considerations {#privacy-and-security}
 ===========================================================
