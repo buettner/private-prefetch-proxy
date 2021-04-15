@@ -10,6 +10,7 @@ Assume Explicit For: yes
 Complain About: accidental-2119 yes, missing-example-ids yes
 Indent: 2
 Boilerplate: omit conformance
+Default Biblio Status: current
 </pre>
 <pre class="biblio">
 {
@@ -22,22 +23,16 @@ Boilerplate: omit conformance
 }
 </pre>
 
+<section class="non-normative">
 Introduction {#intro}
 =====================
 
 *This section is non-normative.*
 
-Publishers may wish not to accept traffic from private prefetch proxies and other sources other than direct user traffic, for instance to reduce server load due to speculative prefetch activity.
+Publishers might wish not to accept traffic from private prefetch proxies and other sources other than direct user traffic, for instance to reduce server load due to speculative prefetch activity.
 
-We propose a well-known "traffic advice" resource, analogous to `robots.txt` (for web crawlers), which allows an HTTP server to declare that implementing agents should stop sending traffic to it for some time.
-
-
-Infrastructure {#infra}
-=======================
-
-This specification depends on the Infra Standard. [[INFRA]]
-
-This specification uses terminology from the Fetch, HTTP, HTML and URL standards. [[FETCH]] [[HTTP-SEMANTICS]] [[HTML]] [[URL]]
+We propose a well-known "traffic advice" resource, analogous to `robots.txt` (for web crawlers), which allows an HTTP server to request that implementing agents stop sending traffic to it for some time.
+</section>
 
 Implementations {#implementations}
 ==================================
@@ -117,22 +112,22 @@ To <dfn>fetch traffic advice</dfn> for [=origin=] |origin|, [=agent identity=] |
 
 1.  Let |processResponse| be the following steps, given [=response=] |response|:
 
-    1.  If |response|'s [=response/type=] is `"error"`, then terminate the fetch, run |whenComplete| with `"unreachable"`, and return.
+    1.  If |response|'s [=response/type=] is `"error"`, then [=fetch/terminate=] the fetch, run |whenComplete| with `"unreachable"`, and return.
 
-    1.  If |response|'s [=response/type=] is `"opaqueredirect"`, then terminate the fetch, run |whenComplete| with null, and return.
+    1.  If |response|'s [=response/type=] is `"opaqueredirect"`, then [=fetch/terminate=] the fetch, run |whenComplete| with null, and return.
 
     1.  [=Assert=]: |response|'s [=response/type=] is `"basic"`.
 
-    1.  If |response|'s [=response/status=] is 429 (Too Many Requests; see [[RFC6585]]) or 503 (Service Unavailable; see [[HTTP-SEMANTICS]]), then terminate the fetch, run |whenComplete| with `"unreachable"`, and return.
+    1.  If |response|'s [=response/status=] is 429 (Too Many Requests; see [[RFC6585]]) or 503 (Service Unavailable; see [[HTTP-SEMANTICS]]), then [=fetch/terminate=] the fetch, run |whenComplete| with `"unreachable"`, and return.
         <div class="note">If present, the [[HTTP-SEMANTICS]] `Retry-After` response header could be used as a hint about when to next retry.</div>
 
-    1.  If |response|'s [=response/status=] is not an [=ok status=], then terminate the fetch, run |whenComplete| with null and return.
+    1.  If |response|'s [=response/status=] is not an [=ok status=], then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
 
-    1.  If |response|'s [=response/status=] is a [=null body status=], then terminate the fetch, run |whenComplete| with null and return.
+    1.  If |response|'s [=response/status=] is a [=null body status=], then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
 
     1.  Let |mimeType| be the result of [=header list/extracting a MIME type=] from |response|'s [=response/header list=].
 
-    1.  If |mimeType| is failure or its [=MIME type/essence=] is not `"application/trafficadvice+json"`, then terminate the fetch, run |whenComplete| with null and return.
+    1.  If |mimeType| is failure or its [=MIME type/essence=] is not `"application/trafficadvice+json"`, then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
 
 1.  Let |processResponseEndOfBody| be the following steps, given [=response=] |response| and null, failure or [=byte sequence=] |body|:
 
@@ -144,7 +139,7 @@ To <dfn>fetch traffic advice</dfn> for [=origin=] |origin|, [=agent identity=] |
 
     1.  Run |whenComplete| with |parseResult|.
 
-1.  [=Fetch=] |request| with |processResponse| and |processResponseEndOfBody|.
+1.  [=Fetch=] |request| with <i>[=fetch/processResponse=]</i> set to |processResponse| and <i>[=fetch/processResponseEndOfBody=]</i> set to |processResponseEndOfBody|.
 
 </section>
 
@@ -183,18 +178,20 @@ To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent iden
 
 </section>
 
+<section class="non-normative">
 Interpretation {#interpretation}
 ================================
 
 *This section is non-normative.*
 
-[=Traffic advice respecting agents=] should, when they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=fetch traffic advice=] (respecting HTTP caching semantics).
+When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] [=fetch traffic advice=] (respecting HTTP caching semantics).
 
-If the result is null, then no advice was received and the agent should adopt its default behavior.
+If the result is null, then no advice was received. Agents adopt their default behavior.
 
-If the result is `"unreachable"`, then the HTTP server was not able to service the request for traffic advice. The agent should disallow traffic for some interval if possible, since this may indicate that the server cannot accept additional requests at this time.
+If the result is `"unreachable"`, then the HTTP server was not able to service the request for traffic advice. Since this could indicate that the server cannot accept additional requests at this time, agents might stop traffic to the server for some interval.
 
-If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic should be disallowed at this time. Establishing new connections and sending requests should be avoided.
+If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic is discouraged at this time. Agents might respect this by not establishing new connections or sending new requests.
+</section>
 
 Privacy and security considerations {#privacy-and-security}
 ===========================================================
@@ -212,7 +209,7 @@ This document defines well-known URI suffix `traffic-advice` as described by [[W
 :  URI suffix
 :: traffic-advice
 :  Change controller
-:: W3C
+:: The editor(s) of this document, pending a standards venue
 :  Specification(s)
 :: This document
 :  Status
@@ -242,7 +239,7 @@ This document defines the [=MIME type=] `application/trafficadvice+json` as desc
 :  Published specification
 :: This document
 :  Applications that use this media type
-:: HTTP client applications (as noted in the specification, these may not be web browsers)
+:: [=traffic advice respecting agents=]
 :  Fragment identifier considerations
 :: N/A
 :  Additional information
@@ -262,4 +259,4 @@ This document defines the [=MIME type=] `application/trafficadvice+json` as desc
 :  Restrictions on usage
 :: N/A
 :  Change controller
-:: W3C
+:: The editor(s) of this document, pending a standards venue
