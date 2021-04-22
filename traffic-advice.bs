@@ -1,0 +1,258 @@
+<pre class="metadata">
+Title: Traffic Advice
+Shortname: traffic-advice
+Status: DREAM
+Repository: buettner/private-prefetch-proxy
+Editor: Jeremy Roman, Google https://www.google.com/, jbroman@chromium.org
+Abstract: A proposal to allow site owners to advise prefetch proxies and other agents to disallow traffic.
+Markup Shorthands: css no, markdown yes
+Assume Explicit For: yes
+Complain About: accidental-2119 yes, missing-example-ids yes
+Indent: 2
+Boilerplate: omit conformance
+Default Biblio Status: current
+</pre>
+<pre class="biblio">
+{
+    "HTTP-SEMANTICS": {
+        "aliasOf": "RFC7231"
+    },
+    "WELL-KNOWN": {
+        "aliasOf": "RFC8615"
+    }
+}
+</pre>
+
+<section class="non-normative">
+Introduction {#intro}
+=====================
+
+*This section is non-normative.*
+
+Publishers might wish not to accept traffic from private prefetch proxies and other sources other than direct user traffic, for instance to reduce server load due to speculative prefetch activity.
+
+We propose a well-known "traffic advice" resource, analogous to `robots.txt` (for web crawlers), which allows an HTTP server to request that implementing agents stop sending traffic to it for some time.
+</section>
+
+Implementations {#implementations}
+==================================
+
+This specification may be implemented by <dfn>traffic advice respecting agents</dfn>, such as proxy servers or other applications which direct HTTP traffic on behalf of clients such as a web browser.
+
+While [[FETCH]] is used to describe the algorithm to request this resource, such agents might not implement [[HTML]].
+
+Definitions {#dfns}
+===================
+
+A <dfn>traffic advice entry</dfn> is a [=struct=] with the following [=struct/items=]:
+*  <dfn for="traffic advice entry">disallowed flag</dfn>, a [=boolean=] which is initially false
+   <div class="note">If the [=traffic advice entry/disallowed flag=] is true, the advice requests that traffic, including establishing connections and sending requests, be avoided.</div>
+
+A <dfn>traffic advice result</dfn> is null, a [=traffic advice entry=], or `"unreachable"`.
+
+An <dfn>agent identity</dfn> is a [=list=] of [=strings=]. It must contain at least two elements, and the last must be `"*"`.
+
+Identity {#identity}
+====================
+
+Each agent should have an brand name that specifically identifies it (such as `PollyPrefetchProxy`).
+
+Its [=agent identity=] is all of the following that apply, in order:
+
+1.  The brand name
+1.  `"prefetch-proxy"`, if the agent is a proxy server which exclusively serves prefetch traffic (for example, a [private prefetch proxy](https://github.com/buettner/private-prefetch-proxy))
+1.  `"*"`
+
+Fetching {#fetching}
+====================
+
+<section algorithm="generate-url">
+
+To <dfn>generate a traffic advice URL</dfn> for [=origin=] |origin|, run the following steps:
+
+1.  If |origin| is not a [=tuple origin=], return failure.
+
+1.  If |origin|'s [=origin/scheme=] is not an [=HTTP(S) scheme=], return failure.
+
+1. If |origin| is not a [=potentially trustworthy origin=], return failure.
+
+1.  Return a new [=URL=] as follows:
+
+    :  [=url/scheme=]
+    :: |origin|'s [=origin/scheme=]
+    :  [=url/host=]
+    :: |origin|'s [=origin/host=]
+    :  [=url/port=]
+    :: |origin|'s [=origin/port=]
+    :  [=url/path=]
+    :: « `".well-known"`, `"traffic-advice"` »
+    
+</section>
+
+<section algorithm="fetch-traffic-advice">
+
+To <dfn>fetch traffic advice</dfn> for [=origin=] |origin|, [=agent identity=] |identity| and algorithm |whenComplete| accepting a [=traffic advice result=]:
+
+1.  Let |url| be the result of [=generating a traffic advice URL=] for |origin|.
+    If it results in failure, then return failure.
+
+1.  Let |request| be a [=request=] as follows:
+
+    :  [=request/method=]
+    :: `` `GET` ``
+    :  [=request/URL=]
+    :: |url|
+    :  [=request/client=]
+    :: null
+    :  [=request/credentials mode=]
+    :: `"omit"`
+    :  [=request/redirect mode=]
+    :: `"manual"`
+        <div class="note">This means that a [=redirect status=] will not lead to another origin being contacted.</div>
+
+1.  Let |processResponse| be the following steps, given [=response=] |response|:
+
+    1.  If |response|'s [=response/type=] is `"error"`, then [=fetch/terminate=] the fetch, run |whenComplete| with `"unreachable"`, and return.
+
+    1.  If |response|'s [=response/type=] is `"opaqueredirect"`, then [=fetch/terminate=] the fetch, run |whenComplete| with null, and return.
+
+    1.  [=Assert=]: |response|'s [=response/type=] is `"basic"`.
+
+    1.  If |response|'s [=response/status=] is 429 (Too Many Requests; see [[RFC6585]]) or 503 (Service Unavailable; see [[HTTP-SEMANTICS]]), then [=fetch/terminate=] the fetch, run |whenComplete| with `"unreachable"`, and return.
+        <div class="note">If present, the [[HTTP-SEMANTICS]] `Retry-After` response header could be used as a hint about when to next retry.</div>
+
+    1.  If |response|'s [=response/status=] is not an [=ok status=], then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
+
+    1.  If |response|'s [=response/status=] is a [=null body status=], then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
+
+    1.  Let |mimeType| be the result of [=header list/extracting a MIME type=] from |response|'s [=response/header list=].
+
+    1.  If |mimeType| is failure or its [=MIME type/essence=] is not `"application/trafficadvice+json"`, then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
+
+1.  Let |processResponseEndOfBody| be the following steps, given [=response=] |response| and null, failure or [=byte sequence=] |body|:
+
+    1.  If |body| is not a [=byte sequence=], then run |whenComplete| with null and return.
+
+    1.  Let |string| be the result of [=UTF-8 decoding=] |body|.
+
+    1.  Let |parseResult| be the result of [=parsing traffic advice=] from |string| given |identity|.
+
+    1.  Run |whenComplete| with |parseResult|.
+
+1.  [=Fetch=] |request| with <i>[=fetch/processResponse=]</i> set to |processResponse| and <i>[=fetch/processResponseEndOfBody=]</i> set to |processResponseEndOfBody|.
+
+</section>
+
+Parsing {#parsing}
+==================
+
+<section algorithm="parse-traffic-advice">
+
+To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent identity=] |identity|:
+
+1.  Let |parsed| be the result of [=parsing JSON into Infra values=] given |string|. If this throws an exception, then return null.
+
+1.  If |parsed| is not a [=list=], then return null.
+
+1.  Let |bestMatch| be null.
+
+1.  [=list/For each=] |entry| of |parsed|:
+
+    1.  If |entry| is not a [=map=], then [=iteration/continue=].
+
+    1.  If |entry|[`"user_agent"`] does not [=map/exist=] or is not a [=string=], then [=iteration/continue=].
+
+    1.  Let |agentSelector| be |entry|[`"user_agent"`].
+
+    1.  If |identity| does not contain |agentSelector|, then [=iteration/continue=].
+
+    1.  If |bestMatch| is null or |agentSelector| appears at an earlier index in |identity| than |bestMatch|[`"user_agent"`] does, then set |bestMatch| to |entry|.
+
+1.  If |bestMatch| is null, then return null.
+
+1.  Let |entry| be a [=traffic advice entry=].
+
+1.  If |bestMatch|[`"disallowed"`] [=map/exists=] and is true, then set |entry|'s [=traffic advice entry/disallowed flag=] to true.
+
+1.  Return |entry|.
+
+</section>
+
+Interpretation {#interpretation}
+================================
+
+When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] should [=fetch traffic advice=] (respecting HTTP caching semantics).
+
+If the result is null, then no advice was received. Agents should adopt their default behavior.
+
+If the result is `"unreachable"`, then the HTTP server was not able to service the request for traffic advice. Since this could indicate that the server cannot accept additional requests at this time, agents may stop traffic to the server for some interval.
+
+If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic is discouraged at this time. Agents should respect this by not establishing new connections or sending new requests.
+
+Privacy and security considerations {#privacy-and-security}
+===========================================================
+
+<p class="issue">TODO: fill this in</p>
+
+IANA considerations {#iana}
+===========================
+
+Well-known `traffic-advice` URI {#iana-well-known}
+--------------------------------------------------
+
+This document defines well-known URI suffix `traffic-advice` as described by [[WELL-KNOWN]]. It should be submitted for registration as follows:
+
+:  URI suffix
+:: traffic-advice
+:  Change controller
+:: The editor(s) of this document, pending a standards venue
+:  Specification(s)
+:: This document
+:  Status
+:: provisional
+:  Related information
+:: None
+
+The `application/trafficadvice+json` MIME type {#iana-mime-type}
+----------------------------------------------------------------
+
+This document defines the [=MIME type=] `application/trafficadvice+json` as described by [[RFC6838]]. It should be submitted for registration as follows:
+
+:  Type name
+:: `application`
+:  Subtype name
+:: `trafficadvice+json`
+:  Required parameters
+:: N/A
+:  Optional parameters
+:: N/A
+:  Encoding considerations
+:: Always UTF-8
+:  Security considerations
+:: <p class="issue">TODO: fill this in</p>
+:  Interoperability considerations
+:: <p class="issue">TODO: fill this in</p>
+:  Published specification
+:: This document
+:  Applications that use this media type
+:: [=traffic advice respecting agents=]
+:  Fragment identifier considerations
+:: N/A
+:  Additional information
+::
+    :  Deprecated alias names for this type
+    :: N/A
+    :  Magic number(s)
+    :: N/A
+    :  File extension(s)
+    :: None. This resource will be named `traffic-advice` when fetched over HTTP.
+    :  Macintosh file type code
+    :: Same as for `application/json` [[RFC8259]]
+:  Person & email address to contact for further information
+:: The editor(s) of this document
+:  Intended usage
+:: Common
+:  Restrictions on usage
+:: N/A
+:  Change controller
+:: The editor(s) of this document, pending a standards venue
