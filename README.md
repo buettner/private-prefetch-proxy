@@ -13,7 +13,7 @@ To make it easier to achieve instant experiences on the web, we’re exploring a
 We want to make it easy for sites to take advantage of cross-origin prefetching without revealing the user’s IP address to the destination. We propose using an HTTP/2 CONNECT proxy to obfuscate the user’s IP during prefetching to achieve this goal, while at the same time maintaining the security properties of the web and giving both users and websites control over the use of the proxy.
 
 ## Non-goals
-This proposal is only relevant for the cross-origin cases. For same-origin prefetching/prerendering, there is no need to hide the user’s IP address or other state. Indeed, the party triggering prefetch/prerender is the same party that is being prefetched/prerendered, and naturally has access to said information. While same-origin prefetch/prerendering are out-of-scope of this explainer, we are nevertheless interested in improving prefetching/prerendering for both cross-origin and same-origin scenarios through other efforts.
+This proposal is only relevant for the cross-origin cases. For same-origin prefetching/prerendering, there is no need to hide the user’s IP address or other state. Indeed, the party triggering prefetch/prerender is the same party that is being prefetched/prerendered, and naturally has access to this information. While same-origin prefetch/prerendering are out-of-scope of this explainer, we are nevertheless interested in improving prefetching/prerendering for both cross-origin and same-origin scenarios through other efforts.
 
 ## Challenges
 There are two primary concerns we see with prefetch proxies. The first is that they can amplify the impact of compromised TLS certificates. Today, an attacker must have a compromised TLS certificate and also be on the network path between the user and that origin to MITM the connection. If attackers can designate and run prefetch proxies, they can trivially put themselves on the network path. A related concern is collusion, where a prefetch proxy works with some destinations to selectively unblind requests.
@@ -45,7 +45,7 @@ We believe that a referrer opt-in combined with opt-outs for users and publisher
  * Both users and publishers can choose to opt-out if they are uncomfortable with the feature (e.g. concerned about extra data usage).
 
 #### Referrer opt-in
-Referrers opt-in to the feature by indicating which links should be prefetched. Tentatively, we suggest the following approach built on top of a minimal subset of the speculation rules from the [Alternate Loading Modes](https://github.com/jeremyroman/alternate-loading-modes/blob/main/triggers.md) proposal:
+Referrers opt-in to the feature by using [Speculation Rules](https://github.com/jeremyroman/alternate-loading-modes/blob/main/triggers.md) to indicate which links should be privately prefetched. E.g.,:
 
 ```html
 <script type="speculationrules">
@@ -53,7 +53,7 @@ Referrers opt-in to the feature by indicating which links should be prefetched. 
   "prefetch": [
     {"source": "list",
      "urls": ["https://whizbang.example/bestof2020.html"],
-     "requires": ["anonymous-client-ip"]}
+     "requires": ["anonymous-client-ip-when-cross-origin"]}
   ]
 }
 </script>
@@ -61,7 +61,7 @@ Referrers opt-in to the feature by indicating which links should be prefetched. 
 
 Where:
   - `urls` would contain a list of URLs the referrer believes to be good candidates for prefetching. The browser would consider this list for prefetching, in addition to  other constraints (e.g. bandwidth, prioritizing the main user experience, user preferences, etc).
- - `requires": ["anonymous-client-ip"]` indicates that the referrer wants the cross origin prefetches to be done in a privacy preserving manner.
+ - `requires": ["anonymous-client-ip-when-cross-origin"]` indicates that the referrer wants the cross origin prefetches to be done in a privacy preserving manner.
 
 
 #### User opt-out
@@ -72,11 +72,9 @@ Publishers can opt out by disallowing connections in their [traffic advice](traf
 
 Another option for origin-wide opt-out is to leverage the publisher's DNS record:
 * Publishers specify in their DNS entry that they are opting out of proxied prefetching (completely or with some TBD granularity if necessary). 
-* The DNS check would be done by the proxy for privacy reasons;  issuing a DNS request from the browser before navigation would share prefetch information with the DNS resolver and potentially the target host. 
+* The DNS check would be done by the proxy for privacy reasons; issuing a DNS request from the browser before navigation would share prefetch information with the DNS resolver and potentially the target host. 
 
-Ideally, the browser would fetch the opt-out signal *before* making a connection to the proxy. While there are proposals to enable anonymous fetching of both DNS records ([Oblivious DNS](https://tools.ietf.org/html/draft-pauly-dprive-oblivious-doh-00)) and HTTP resources ([Oblivious HTTP](https://tools.ietf.org/html/draft-thomson-http-oblivious-00)), neither is well-supported yet. If either of those proposals gains traction, we may want to revisit the publisher opt-out design to take advantage of Oblivous fetching.
-
-In addition, publishers can opt-out for individual requests, for example,  when dealing with temporary traffic spikes or other issues. For these, publishers should look for the `Purpose: prefetch` request header and reject requests accordingly (see [Geolocation](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
+In addition, publishers can opt-out for individual requests, for example, when dealing with temporary traffic spikes or other issues. Publishers should look for the `Purpose: prefetch` request header and reject requests accordingly (see [Geolocation](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
 
 ### Future opportunities
 We’re continuing to explore ways to safely prefetch via proxies not operated by the browser. In that case, referrers may wish to specify which (if any) proxies they trust with their user data. The *speculation rules* approach offers a flexible pattern which would allow for this extension.
@@ -103,21 +101,17 @@ Our experiment found that fetching the mainframe HTML, along with statically lin
 
 **Concern:** “TLS key leaks (e.g. heartbleed) pose a greater user threat with a private prefetch proxy because it allows an attacker to direct prefetches through a colluding proxy, thereby manipulating the network path and making MITM attacks easier.”
 
-This is a risk if we allow websites to specify any “private prefetch proxy” of their choosing. For instance, a malicious website could specify their own proxy, loaded with compromised TLS keys, and trick the user into clicking a prefetched link for a legitimate website.
-
-This suggests that “private prefetch proxies” need to be trusted by the browser before they will be used for prefetching. We are currently developing a “trusted private prefetch proxy” model with requirements and potentially audits.
+This is a risk if we allow websites to specify any “private prefetch proxy” of their choosing. For instance, a malicious website could specify their own proxy, loaded with compromised TLS keys, and trick the user into clicking a prefetched link for a legitimate website. For this reason, “private prefetch proxies” need to be trusted by the browser before they will be used for prefetching. 
 
 ## Risk of collusion
 **Concern:** “Private prefetch proxies enable a new vector for cross-site user tracking, as the proxy can directly terminate TLS connections to origins the proxy owns or colludes with, and then it can directly add tracking identifiers to requests. ”
 
-We believe that a “trusted private prefetch proxy” model would also address this concern. Not only must private prefetch proxies not introduce new  identifiers, they must in fact IP-blind all destination origins. 
+This is another reason why the proxy must be trusted by the browser. Not only must private prefetch proxies not introduce new identifiers, they must in fact IP-blind all destination origins. 
 
 ## Learning about the user’s interests
-**Concern:** “Prefetch proxies will learn about users based on their prefetch requests, which they could monetize  or leverage themselves.”
+**Concern:** “Prefetch proxies will learn about users based on their prefetch requests, which they could monetize or leverage themselves.”
 
-Similar to other concerns about the trustworthiness of the proxy, we believe that a trusted private prefetch proxy model will be sufficient to prevent such abuse.
-
-In addition, both the referrer website and the user would have control over which proxies (if any) they are willing to use,  with prefetching being disabled if there is no agreement.
+Similar to other concerns about the trustworthiness of the proxy, we believe the only current way to address this concern is to require that the browser trusts the proxy. However, both the referrer website and the user have control over which proxies (if any) they are willing to use, with prefetching being disabled if there is no agreement.
 
 ## Content blockers and extensions
 
@@ -125,12 +119,12 @@ In addition, both the referrer website and the user would have control over whic
 
 Browsers should continue to ensure that network requests and responses are subject to a user’s installed extensions even when the requests are handled by a private prefetch proxy.
 
-For DNS based content blockers, there is a range of options to explore including allowing users to disable the feature altogether, or to enable an additional blocking DNS lookup for every domain at navigation time (along with the concomitant performance penalty).
+For DNS based content blockers, there is a range of options to explore including allowing users to disable the feature altogether, or to enable an additional blocking DNS lookup for every domain at navigation time (along with the associated performance penalty).
 
 ## Impact for services provided by ISPs
 **Concern:** “How does this interact with content filtering?”
 
-We acknowledge that network administrators may need to filter content. We’re considering the following approach to avoid interfering in these scenarios. 
+We acknowledge that network administrators may need to filter content. We propose the following approach to avoid interfering in these scenarios. 
 
 At startup and on a change of network, the browser would attempt to resolve a purpose-specific domain name, and examine the result:
 
@@ -143,19 +137,19 @@ At startup and on a change of network, the browser would attempt to resolve a pu
 
 To protect against attackers using the proxy to abuse websites, the prefetch proxy must block traffic that does not fit the pattern of legitimate link prefetching e.g., based on the number of requests, session duration, etc.
 
-We’re also considering potential schemes for authentication, as well as mechanisms by which website operators can opt-out of proxied prefetching (e.g., rejecting requests with the “Purpose: prefetch” header and potentially a blanket opt-out expressed in the DNS record). In addition, private prefetch proxies should allow for reverse DNS lookups of their IP addresses and publish an escalation path for help addressing potential abuse concerns. 
+We’re also considering schemes for authentication, and website operators can always opt-out of proxied prefetching (e.g., by rejecting requests with the “Purpose: prefetch” header or adding a [traffic-advice](https://github.com/buettner/private-prefetch-proxy/blob/main/traffic-advice.md) file). In addition, private prefetch proxies should allow for reverse DNS lookups of their IP addresses and publish an escalation path for help addressing potential abuse concerns. 
 
 ## Geolocation
 **Concern:** "How will this work with geography-based use cases (e.g. Geo-filtering / Geo-access)?"
 
-The destination server will see the IP of the proxy egress IP, not the user's IP; this will interfere with IP-based geolocation. 
+The destination server will see the IP of the proxy egress IP, not the user's IP; this may interfere with IP-based geolocation. 
 Servers that rely on geolocation to determine what content to serve have the following options:
 * Determine the location of the user at navigation time, e.g., by triggering a request via JS.
 * Reject requests with the "Purpose: prefetch" header for resources that are georestricted.
 
 More speculative ideas worth exploring are:
 * Requiring proxies to only egress traffic from IPs in the same country/region as the user. The challenge here is having agreement on the granularity of "region", as proxies likely can't egress in every country.
-* APIs/mechanism by which the proxy can tell the destination what general region the user is in. Similar to the above, there would need to be agreement about the required granularity.
+* APIs/mechanism by which the proxy can tell the destination what general region the user is in (e.g., [Geohash HTTP Client Hints](https://tfpauly.github.io/privacy-proxy/draft-geohash-hint.html)). Similar to the above, there would need to be agreement about the required granularity.
 
 ## Traffic analysis
 **Question**: "Even though prefetches are end-to-end encrypted between the browser and the destination, can't the proxy perform traffic analysis attacks?"
