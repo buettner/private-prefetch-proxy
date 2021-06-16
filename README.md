@@ -74,7 +74,7 @@ Another option for origin-wide opt-out is to leverage the publisher's DNS record
 * Publishers specify in their DNS entry that they are opting out of proxied prefetching (completely or with some TBD granularity if necessary). 
 * The DNS check would be done by the proxy for privacy reasons; issuing a DNS request from the browser before navigation would share prefetch information with the DNS resolver and potentially the target host. 
 
-In addition, publishers can opt-out for individual requests, for example, when dealing with temporary traffic spikes or other issues. Publishers should look for the `Purpose: prefetch` request header and reject requests accordingly (see [Geolocation](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
+In addition, publishers can opt-out for individual requests, for example, when dealing with temporary traffic spikes or other issues. Publishers should look for the `Purpose: prefetch` request header and respond with an HTTP 403 (Forbidden) (see [Geolocation](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
 
 ### Future opportunities
 We’re continuing to explore ways to safely prefetch via proxies not operated by the browser. In that case, referrers may wish to specify which (if any) proxies they trust with their user data. The *speculation rules* approach offers a flexible pattern which would allow for this extension.
