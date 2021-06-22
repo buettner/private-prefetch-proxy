@@ -86,7 +86,7 @@ To <dfn>generate a traffic advice URL</dfn> for [=origin=] |origin|, run the fol
     :: |origin|'s [=origin/port=]
     :  [=url/path=]
     :: « `".well-known"`, `"traffic-advice"` »
-    
+
 </section>
 
 <section algorithm="fetch-traffic-advice">
@@ -172,7 +172,7 @@ To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent iden
 
 1.  Let |entry| be a [=traffic advice entry=].
 
-1.  If |bestMatch|[`"disallowed"`] [=map/exists=] and is true, then set |entry|'s [=traffic advice entry/disallowed flag=] to true.
+1.  If |bestMatch|[`"disallow"`] [=map/exists=] and is true, then set |entry|'s [=traffic advice entry/disallowed flag=] to true.
 
 1.  Return |entry|.
 
