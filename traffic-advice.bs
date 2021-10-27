@@ -14,6 +14,17 @@ Default Biblio Status: current
 </pre>
 <pre class="biblio">
 {
+    "HTTP-CACHING": {
+        "authors": [
+            "R. Fielding",
+            "M. Nottingham",
+            "J. Reschke"
+        ],
+        "href": "https://httpwg.org/http-core/draft-ietf-httpbis-cache-latest.html",
+        "title": "HTTP Caching",
+        "status": "Internet-Draft",
+        "publisher": "IETF"
+    },
     "HTTP-SEMANTICS": {
         "aliasOf": "RFC7231"
     },
@@ -189,10 +200,34 @@ If the result is `"unreachable"`, then the HTTP server was not able to service t
 
 If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic is discouraged at this time. Agents should respect this by not establishing new connections or sending new requests.
 
-Privacy and security considerations {#privacy-and-security}
-===========================================================
+Security considerations {#security}
+===================================
 
-<p class="issue">TODO: fill this in</p>
+Type confusion {#type-confusion}
+--------------------------------
+
+Like other resources, it is possible that the `/.well-known/traffic-advice` path could be used for a request with some other destination (e.g., as a script). If interpreted as JavaScript, the JSON data would either be syntactically invalid or an empty block. More generally, this specification requires the use of a MIME type that is not used for any other purpose, and standard countermeasures (e.g., `X-Content-Type-Options: nosniff`) can be used to prevent type confusion in some cases which are permissive of mismatched MIME types.
+
+Caching issues {#security-caching}
+----------------------------------
+
+Because the traffic advice resource is expected to be cached by [=traffic advice respecting agents=] such as private prefetch proxies, it is possible that a temporary compromise of an origin server or its private key could be extended to a longer outage of some traffic due to an agent caching a policy that prevents or throttles traffic, leading to a denial of service for such traffic. This is similar to attacks against HTTP Public Key Pinning [[RFC7469]].
+
+Agents should limit the maximum cache lifetime of traffic advice (e.g., 48 hours) and consider providing explicit mechanisms to flush this cache from time to time. This may be less urgent if the traffic is only non-essential (e.g., prefetch) traffic.
+
+Request amplification {#request-amplification}
+----------------------------------------------
+
+Agents which are proxy servers accessible to untrusted users (esp. the general public) may be susceptible to being used to amplify a denial of service attack if the volume of network traffic required to cause a fetch of traffic advice is less than the volume resulting from such a fetch. This would allow the agent to be used to overwhelm the resources of the origin server with fewer clients than would otherwise be required.
+
+To mitigate this, agents should, in addition to any other anti-abuse measures, implement caching of the traffic advice within their own systems. This should respect ordinary [[HTTP-CACHING]] semantics, but to protect against unconfigured or misconfigured origin servers, should provide reasonable default and minimum cache lifetimes regardless of the lifetime specified in the response. Suggested values are 30 minutes and 10 minutes, respectively.
+
+Privacy considerations {#privacy}
+=================================
+
+This specification generally provides mechanisms for agents to limit the traffic they are sending. Most privacy considerations are expected to be particular to the agents in question (for example, proxies inspecting traffic they carry).
+
+If privacy considerations related to the traffic advice mechanism itself are identified, they should be added here.
 
 IANA considerations {#iana}
 ===========================
@@ -229,9 +264,9 @@ This document defines the [=MIME type=] `application/trafficadvice+json` as desc
 :  Encoding considerations
 :: Always UTF-8
 :  Security considerations
-:: <p class="issue">TODO: fill this in</p>
+:: See [Security considerations](#security).
 :  Interoperability considerations
-:: <p class="issue">TODO: fill this in</p>
+:: This MIME type is not known to be in previous use. Applications which can process `application/json` should be able to process all valid data with this MIME type.
 :  Published specification
 :: This document
 :  Applications that use this media type
