@@ -152,6 +152,10 @@ To <dfn>fetch traffic advice</dfn> for [=origin=] |origin|, [=agent identity=] |
 
 1.  [=Fetch=] |request| with <i>[=fetch/processResponse=]</i> set to |processResponse| and <i>[=fetch/processResponseEndOfBody=]</i> set to |processResponseEndOfBody|.
 
+    <div class="advisement">
+        Notwithstanding the usual behavior of [[HTTP-CACHING]], agents (especially ones shared amongst multiple users) should consider applying a minimum freshness lifetime (10 minutes is suggested) and maximum freshness lifetime (48 hours is suggested) in order to balance the [security considerations](#security) discussed below. If these suggested values are used, a default freshness lifetime (if none is specified) of 30 minutes may be appropriate.
+    </div>
+
 </section>
 
 Parsing {#parsing}
@@ -192,7 +196,7 @@ To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent iden
 Interpretation {#interpretation}
 ================================
 
-When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] should [=fetch traffic advice=] (respecting HTTP caching semantics).
+When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] should [=fetch traffic advice=] (respecting [[HTTP-CACHING]] semantics).
 
 If the result is null, then no advice was received. Agents should adopt their default behavior.
 
@@ -213,14 +217,16 @@ Caching issues {#security-caching}
 
 Because the traffic advice resource is expected to be cached by [=traffic advice respecting agents=] such as private prefetch proxies, it is possible that a temporary compromise of an origin server or its private key could be extended to a longer outage of some traffic due to an agent caching a policy that prevents or throttles traffic, leading to a denial of service for such traffic. This is similar to attacks against HTTP Public Key Pinning [[RFC7469]].
 
-Agents should limit the maximum cache lifetime of traffic advice (e.g., 48 hours) and consider providing explicit mechanisms to flush this cache from time to time. This may be less urgent if the traffic is only non-essential (e.g., prefetch) traffic.
+This is less of an issue if the traffic is non-essential (e.g., prefetch) traffic.
+
+To mitigate this, well-behaved agents implement a maximum freshness lifetime when they [=fetch traffic advice=].
 
 Request amplification {#request-amplification}
 ----------------------------------------------
 
-Agents which are proxy servers accessible to untrusted users (esp. the general public) may be susceptible to being used to amplify a denial of service attack if the volume of network traffic required to cause a fetch of traffic advice is less than the volume resulting from such a fetch. This would allow the agent to be used to overwhelm the resources of the origin server with fewer clients than would otherwise be required.
+Agents which are proxy services accessible to untrusted users (esp. the general public) may be susceptible to being used to amplify a denial of service attack conducted, for example, by a botnet. For example, if a small request from a client (e.g. `CONNECT target.example:443` with small headers) can cause a larger request (e.g., `GET /.well-known/traffic-advice` with large headers) to the origin server, this could be used to increase the effective bandwidth available to the distributed denial of service attack against an origin server.
 
-To mitigate this, agents should, in addition to any other anti-abuse measures, implement caching of the traffic advice within their own systems. This should respect ordinary [[HTTP-CACHING]] semantics, but to protect against unconfigured or misconfigured origin servers, should provide reasonable default and minimum cache lifetimes regardless of the lifetime specified in the response. Suggested values are 30 minutes and 10 minutes, respectively.
+To mitigate this, well-behaved agents implement, in addition to other anti-abuse measures, a minimum freshness lifetime when they [=fetch traffic advice=].
 
 Privacy considerations {#privacy}
 =================================
