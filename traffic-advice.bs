@@ -231,7 +231,7 @@ To mitigate this, well-behaved agents implement, in addition to other anti-abuse
 Privacy considerations {#privacy}
 =================================
 
-This specification generally provides mechanisms for agents to limit the traffic they are sending. Most privacy considerations are expected to be particular to the agents in question (for example, proxies inspecting traffic they carry).
+This specification provides general mechanisms for agents to limit the traffic they are sending. Most privacy considerations are expected to be particular to the agents in question (for example, proxies inspecting traffic they carry).
 
 If privacy considerations related to the traffic advice mechanism itself are identified, they should be added here.
 
