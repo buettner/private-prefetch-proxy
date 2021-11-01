@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version a210b7d86, updated Thu Sep 16 13:45:19 2021 -0700" name="generator">
+  <meta content="Bikeshed version d7036035b, updated Fri Oct 8 17:07:11 2021 -0700" name="generator">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1943,12 +1943,11 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Traffic Advice</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-10-05">5 October 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-11-01">1 November 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
      <dd><a href="https://github.com/buettner/private-prefetch-proxy/issues/">GitHub</a>
-     <dd><a href="#issues-index">Inline In Spec</a>
      <dt class="editor">Editor:
      <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:jbroman@chromium.org">Jeremy Roman</a> (<a class="p-org org" href="https://www.google.com/">Google</a>)
     </dl>
@@ -1956,7 +1955,7 @@ dfn > a.self-link::before      { content: "#"; }
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 5 October 2021,
+In addition, as of 1 November 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1977,12 +1976,19 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#fetching"><span class="secno">5</span> <span class="content">Fetching</span></a>
     <li><a href="#parsing"><span class="secno">6</span> <span class="content">Parsing</span></a>
     <li><a href="#interpretation"><span class="secno">7</span> <span class="content">Interpretation</span></a>
-    <li><a href="#privacy-and-security"><span class="secno">8</span> <span class="content">Privacy and security considerations</span></a>
     <li>
-     <a href="#iana"><span class="secno">9</span> <span class="content">IANA considerations</span></a>
+     <a href="#security"><span class="secno">8</span> <span class="content">Security considerations</span></a>
      <ol class="toc">
-      <li><a href="#iana-well-known"><span class="secno">9.1</span> <span class="content">Well-known <code>traffic-advice</code> URI</span></a>
-      <li><a href="#iana-mime-type"><span class="secno">9.2</span> <span class="content">The <code>application/trafficadvice+json</code> MIME type</span></a>
+      <li><a href="#type-confusion"><span class="secno">8.1</span> <span class="content">Type confusion</span></a>
+      <li><a href="#security-caching"><span class="secno">8.2</span> <span class="content">Caching issues</span></a>
+      <li><a href="#request-amplification"><span class="secno">8.3</span> <span class="content">Request amplification</span></a>
+     </ol>
+    <li><a href="#privacy"><span class="secno">9</span> <span class="content">Privacy considerations</span></a>
+    <li>
+     <a href="#iana"><span class="secno">10</span> <span class="content">IANA considerations</span></a>
+     <ol class="toc">
+      <li><a href="#iana-well-known"><span class="secno">10.1</span> <span class="content">Well-known <code>traffic-advice</code> URI</span></a>
+      <li><a href="#iana-mime-type"><span class="secno">10.2</span> <span class="content">The <code>application/trafficadvice+json</code> MIME type</span></a>
      </ol>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
@@ -1996,7 +2002,6 @@ Parts of this work may be from another specification document.  If so, those par
       <li><a href="#normative"><span class="secno"></span> <span class="content">Normative References</span></a>
       <li><a href="#informative"><span class="secno"></span> <span class="content">Informative References</span></a>
      </ol>
-    <li><a href="#issues-index"><span class="secno"></span> <span class="content">Issues Index</span></a>
    </ol>
   </nav>
   <main>
@@ -2118,6 +2123,7 @@ Parts of this work may be from another specification document.  If so, those par
       </ol>
      <li data-md>
       <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch" id="ref-for-concept-fetch">Fetch</a> <var>request</var> with <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response" id="ref-for-process-response">processResponse</a></i> set to <var>processResponse</var> and <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response-end-of-body" id="ref-for-process-response-end-of-body">processResponseEndOfBody</a></i> set to <var>processResponseEndOfBody</var>.</p>
+      <div class="advisement"> Notwithstanding the usual behavior of <a data-link-type="biblio" href="#biblio-http-caching">[HTTP-CACHING]</a>, agents (especially ones shared amongst multiple users) should consider applying a minimum freshness lifetime (10 minutes is suggested) and maximum freshness lifetime (48 hours is suggested) in order to balance the <a href="#security">security considerations</a> discussed below. If these suggested values are used, a default freshness lifetime (if none is specified) of 30 minutes may be appropriate. </div>
     </ol>
    </section>
    <h2 class="heading settled" data-level="6" id="parsing"><span class="secno">6. </span><span class="content">Parsing</span><a class="self-link" href="#parsing"></a></h2>
@@ -2155,14 +2161,25 @@ Parts of this work may be from another specification document.  If so, those par
     </ol>
    </section>
    <h2 class="heading settled" data-level="7" id="interpretation"><span class="secno">7. </span><span class="content">Interpretation</span><a class="self-link" href="#interpretation"></a></h2>
-   <p>When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), <a data-link-type="dfn" href="#traffic-advice-respecting-agents" id="ref-for-traffic-advice-respecting-agents">traffic advice respecting agents</a> should <a data-link-type="dfn" href="#fetch-traffic-advice" id="ref-for-fetch-traffic-advice">fetch traffic advice</a> (respecting HTTP caching semantics).</p>
+   <p>When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), <a data-link-type="dfn" href="#traffic-advice-respecting-agents" id="ref-for-traffic-advice-respecting-agents">traffic advice respecting agents</a> should <a data-link-type="dfn" href="#fetch-traffic-advice" id="ref-for-fetch-traffic-advice">fetch traffic advice</a> (respecting <a data-link-type="biblio" href="#biblio-http-caching">[HTTP-CACHING]</a> semantics).</p>
    <p>If the result is null, then no advice was received. Agents should adopt their default behavior.</p>
    <p>If the result is <code>"unreachable"</code>, then the HTTP server was not able to service the request for traffic advice. Since this could indicate that the server cannot accept additional requests at this time, agents may stop traffic to the server for some interval.</p>
    <p>If the result’s <a data-link-type="dfn" href="#traffic-advice-entry-disallowed-flag" id="ref-for-traffic-advice-entry-disallowed-flag②">disallowed flag</a> is true, then the HTTP server advises that traffic is discouraged at this time. Agents should respect this by not establishing new connections or sending new requests.</p>
-   <h2 class="heading settled" data-level="8" id="privacy-and-security"><span class="secno">8. </span><span class="content">Privacy and security considerations</span><a class="self-link" href="#privacy-and-security"></a></h2>
-   <p class="issue" id="issue-02114162"><a class="self-link" href="#issue-02114162"></a>TODO: fill this in</p>
-   <h2 class="heading settled" data-level="9" id="iana"><span class="secno">9. </span><span class="content">IANA considerations</span><a class="self-link" href="#iana"></a></h2>
-   <h3 class="heading settled" data-level="9.1" id="iana-well-known"><span class="secno">9.1. </span><span class="content">Well-known <code>traffic-advice</code> URI</span><a class="self-link" href="#iana-well-known"></a></h3>
+   <h2 class="heading settled" data-level="8" id="security"><span class="secno">8. </span><span class="content">Security considerations</span><a class="self-link" href="#security"></a></h2>
+   <h3 class="heading settled" data-level="8.1" id="type-confusion"><span class="secno">8.1. </span><span class="content">Type confusion</span><a class="self-link" href="#type-confusion"></a></h3>
+   <p>Like other resources, it is possible that the <code>/.well-known/traffic-advice</code> path could be used for a request with some other destination (e.g., as a script). If interpreted as JavaScript, the JSON data would either be syntactically invalid or an empty block. More generally, this specification requires the use of a MIME type that is not used for any other purpose, and standard countermeasures (e.g., <code>X-Content-Type-Options: nosniff</code>) can be used to prevent type confusion in some cases which are permissive of mismatched MIME types.</p>
+   <h3 class="heading settled" data-level="8.2" id="security-caching"><span class="secno">8.2. </span><span class="content">Caching issues</span><a class="self-link" href="#security-caching"></a></h3>
+   <p>Because the traffic advice resource is expected to be cached by <a data-link-type="dfn" href="#traffic-advice-respecting-agents" id="ref-for-traffic-advice-respecting-agents①">traffic advice respecting agents</a> such as private prefetch proxies, it is possible that a temporary compromise of an origin server or its private key could be extended to a longer outage of some traffic due to an agent caching a policy that prevents or throttles traffic, leading to a denial of service for such traffic. This is similar to attacks against HTTP Public Key Pinning <a data-link-type="biblio" href="#biblio-rfc7469">[RFC7469]</a>.</p>
+   <p>This is less of an issue if the traffic is non-essential (e.g., prefetch) traffic.</p>
+   <p>To mitigate this, well-behaved agents implement a maximum freshness lifetime when they <a data-link-type="dfn" href="#fetch-traffic-advice" id="ref-for-fetch-traffic-advice①">fetch traffic advice</a>.</p>
+   <h3 class="heading settled" data-level="8.3" id="request-amplification"><span class="secno">8.3. </span><span class="content">Request amplification</span><a class="self-link" href="#request-amplification"></a></h3>
+   <p>Agents which are proxy services accessible to untrusted users (esp. the general public) may be susceptible to being used to amplify a denial of service attack conducted, for example, by a botnet. For example, if a small request from a client (e.g. <code>CONNECT target.example:443</code> with small headers) can cause a larger request (e.g., <code>GET /.well-known/traffic-advice</code> with large headers) to the origin server, this could be used to increase the effective bandwidth available to the distributed denial of service attack against an origin server.</p>
+   <p>To mitigate this, well-behaved agents implement, in addition to other anti-abuse measures, a minimum freshness lifetime when they <a data-link-type="dfn" href="#fetch-traffic-advice" id="ref-for-fetch-traffic-advice②">fetch traffic advice</a>.</p>
+   <h2 class="heading settled" data-level="9" id="privacy"><span class="secno">9. </span><span class="content">Privacy considerations</span><a class="self-link" href="#privacy"></a></h2>
+   <p>This specification provides general mechanisms for agents to limit the traffic they are sending. Most privacy considerations are expected to be particular to the agents in question (for example, proxies inspecting traffic they carry).</p>
+   <p>If privacy considerations related to the traffic advice mechanism itself are identified, they should be added here.</p>
+   <h2 class="heading settled" data-level="10" id="iana"><span class="secno">10. </span><span class="content">IANA considerations</span><a class="self-link" href="#iana"></a></h2>
+   <h3 class="heading settled" data-level="10.1" id="iana-well-known"><span class="secno">10.1. </span><span class="content">Well-known <code>traffic-advice</code> URI</span><a class="self-link" href="#iana-well-known"></a></h3>
    <p>This document defines well-known URI suffix <code>traffic-advice</code> as described by <a data-link-type="biblio" href="#biblio-well-known">[WELL-KNOWN]</a>. It should be submitted for registration as follows:</p>
    <dl>
     <dt data-md>URI suffix
@@ -2181,7 +2198,7 @@ Parts of this work may be from another specification document.  If so, those par
     <dd data-md>
      <p>None</p>
    </dl>
-   <h3 class="heading settled" data-level="9.2" id="iana-mime-type"><span class="secno">9.2. </span><span class="content">The <code>application/trafficadvice+json</code> MIME type</span><a class="self-link" href="#iana-mime-type"></a></h3>
+   <h3 class="heading settled" data-level="10.2" id="iana-mime-type"><span class="secno">10.2. </span><span class="content">The <code>application/trafficadvice+json</code> MIME type</span><a class="self-link" href="#iana-mime-type"></a></h3>
    <p>This document defines the <a data-link-type="dfn" href="https://mimesniff.spec.whatwg.org/#mime-type" id="ref-for-mime-type">MIME type</a> <code>application/trafficadvice+json</code> as described by <a data-link-type="biblio" href="#biblio-rfc6838">[RFC6838]</a>. It should be submitted for registration as follows:</p>
    <dl>
     <dt data-md>Type name
@@ -2201,16 +2218,16 @@ Parts of this work may be from another specification document.  If so, those par
      <p>Always UTF-8</p>
     <dt data-md>Security considerations
     <dd data-md>
-     <p class="issue" id="issue-02114162①"><a class="self-link" href="#issue-02114162①"></a>TODO: fill this in</p>
+     <p>See <a href="#security">Security considerations</a>.</p>
     <dt data-md>Interoperability considerations
     <dd data-md>
-     <p class="issue" id="issue-02114162②"><a class="self-link" href="#issue-02114162②"></a>TODO: fill this in</p>
+     <p>This MIME type is not known to be in previous use. Applications which can process <code>application/json</code> should be able to process all valid data with this MIME type.</p>
     <dt data-md>Published specification
     <dd data-md>
      <p>This document</p>
     <dt data-md>Applications that use this media type
     <dd data-md>
-     <p><a data-link-type="dfn" href="#traffic-advice-respecting-agents" id="ref-for-traffic-advice-respecting-agents①">traffic advice respecting agents</a></p>
+     <p><a data-link-type="dfn" href="#traffic-advice-respecting-agents" id="ref-for-traffic-advice-respecting-agents②">traffic advice respecting agents</a></p>
     <dt data-md>Fragment identifier considerations
     <dd data-md>
      <p>N/A</p>
@@ -2618,7 +2635,7 @@ Parts of this work may be from another specification document.  If so, those par
   <aside class="dfn-panel" data-for="term-for-mime-type">
    <a href="https://mimesniff.spec.whatwg.org/#mime-type">https://mimesniff.spec.whatwg.org/#mime-type</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-mime-type">9.2. The application/trafficadvice+json MIME type</a>
+    <li><a href="#ref-for-mime-type">10.2. The application/trafficadvice+json MIME type</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-potentially-trustworthy-origin">
@@ -2753,28 +2770,27 @@ Parts of this work may be from another specification document.  If so, those par
   </dl>
   <h3 class="no-num no-ref heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
+   <dt id="biblio-http-caching">[HTTP-CACHING]
+   <dd>R. Fielding; M. Nottingham; J. Reschke. <a href="https://httpwg.org/http-core/draft-ietf-httpbis-cache-latest.html"><cite>HTTP Caching</cite></a>. Internet-Draft. URL: <a href="https://httpwg.org/http-core/draft-ietf-httpbis-cache-latest.html">https://httpwg.org/http-core/draft-ietf-httpbis-cache-latest.html</a>
    <dt id="biblio-http-semantics">[HTTP-SEMANTICS]
    <dd>R. Fielding, Ed.; J. Reschke, Ed.. <a href="https://httpwg.org/specs/rfc7231.html"><cite>Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content</cite></a>. June 2014. Proposed Standard. URL: <a href="https://httpwg.org/specs/rfc7231.html">https://httpwg.org/specs/rfc7231.html</a>
    <dt id="biblio-rfc6585">[RFC6585]
    <dd>M. Nottingham; R. Fielding. <a href="https://httpwg.org/specs/rfc6585.html"><cite>Additional HTTP Status Codes</cite></a>. April 2012. Proposed Standard. URL: <a href="https://httpwg.org/specs/rfc6585.html">https://httpwg.org/specs/rfc6585.html</a>
    <dt id="biblio-rfc6838">[RFC6838]
    <dd>N. Freed; J. Klensin; T. Hansen. <a href="https://www.rfc-editor.org/rfc/rfc6838"><cite>Media Type Specifications and Registration Procedures</cite></a>. January 2013. Best Current Practice. URL: <a href="https://www.rfc-editor.org/rfc/rfc6838">https://www.rfc-editor.org/rfc/rfc6838</a>
+   <dt id="biblio-rfc7469">[RFC7469]
+   <dd>C. Evans; C. Palmer; R. Sleevi. <a href="https://www.rfc-editor.org/rfc/rfc7469"><cite>Public Key Pinning Extension for HTTP</cite></a>. April 2015. Proposed Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc7469">https://www.rfc-editor.org/rfc/rfc7469</a>
    <dt id="biblio-rfc8259">[RFC8259]
    <dd>T. Bray, Ed.. <a href="https://www.rfc-editor.org/rfc/rfc8259"><cite>The JavaScript Object Notation (JSON) Data Interchange Format</cite></a>. December 2017. Internet Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc8259">https://www.rfc-editor.org/rfc/rfc8259</a>
    <dt id="biblio-well-known">[WELL-KNOWN]
    <dd>M. Nottingham. <a href="https://www.rfc-editor.org/rfc/rfc8615"><cite>Well-Known Uniform Resource Identifiers (URIs)</cite></a>. May 2019. Proposed Standard. URL: <a href="https://www.rfc-editor.org/rfc/rfc8615">https://www.rfc-editor.org/rfc/rfc8615</a>
   </dl>
-  <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
-  <div style="counter-reset:issue">
-   <div class="issue">TODO: fill this in <a class="issue-return" href="#issue-02114162" title="Jump to section">↵</a></div>
-   <div class="issue">TODO: fill this in <a class="issue-return" href="#issue-02114162①" title="Jump to section">↵</a></div>
-   <div class="issue">TODO: fill this in <a class="issue-return" href="#issue-02114162②" title="Jump to section">↵</a></div>
-  </div>
   <aside class="dfn-panel" data-for="traffic-advice-respecting-agents">
    <b><a href="#traffic-advice-respecting-agents">#traffic-advice-respecting-agents</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-traffic-advice-respecting-agents">7. Interpretation</a>
-    <li><a href="#ref-for-traffic-advice-respecting-agents①">9.2. The application/trafficadvice+json MIME type</a>
+    <li><a href="#ref-for-traffic-advice-respecting-agents①">8.2. Caching issues</a>
+    <li><a href="#ref-for-traffic-advice-respecting-agents②">10.2. The application/trafficadvice+json MIME type</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="traffic-advice-entry">
@@ -2816,6 +2832,8 @@ Parts of this work may be from another specification document.  If so, those par
    <b><a href="#fetch-traffic-advice">#fetch-traffic-advice</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-fetch-traffic-advice">7. Interpretation</a>
+    <li><a href="#ref-for-fetch-traffic-advice①">8.2. Caching issues</a>
+    <li><a href="#ref-for-fetch-traffic-advice②">8.3. Request amplification</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="parse-traffic-advice">
