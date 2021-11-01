@@ -14,6 +14,17 @@ Default Biblio Status: current
 </pre>
 <pre class="biblio">
 {
+    "HTTP-CACHING": {
+        "authors": [
+            "R. Fielding",
+            "M. Nottingham",
+            "J. Reschke"
+        ],
+        "href": "https://httpwg.org/http-core/draft-ietf-httpbis-cache-latest.html",
+        "title": "HTTP Caching",
+        "status": "Internet-Draft",
+        "publisher": "IETF"
+    },
     "HTTP-SEMANTICS": {
         "aliasOf": "RFC7231"
     },
@@ -141,6 +152,10 @@ To <dfn>fetch traffic advice</dfn> for [=origin=] |origin|, [=agent identity=] |
 
 1.  [=Fetch=] |request| with <i>[=fetch/processResponse=]</i> set to |processResponse| and <i>[=fetch/processResponseEndOfBody=]</i> set to |processResponseEndOfBody|.
 
+    <div class="advisement">
+        Notwithstanding the usual behavior of [[HTTP-CACHING]], agents (especially ones shared amongst multiple users) should consider applying a minimum freshness lifetime (10 minutes is suggested) and maximum freshness lifetime (48 hours is suggested) in order to balance the [security considerations](#security) discussed below. If these suggested values are used, a default freshness lifetime (if none is specified) of 30 minutes may be appropriate.
+    </div>
+
 </section>
 
 Parsing {#parsing}
@@ -181,7 +196,7 @@ To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent iden
 Interpretation {#interpretation}
 ================================
 
-When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] should [=fetch traffic advice=] (respecting HTTP caching semantics).
+When they would be able to respect advice to disallow traffic to an origin (for example, when requested to proxy prefetch traffic to the origin), [=traffic advice respecting agents=] should [=fetch traffic advice=] (respecting [[HTTP-CACHING]] semantics).
 
 If the result is null, then no advice was received. Agents should adopt their default behavior.
 
@@ -189,10 +204,36 @@ If the result is `"unreachable"`, then the HTTP server was not able to service t
 
 If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic is discouraged at this time. Agents should respect this by not establishing new connections or sending new requests.
 
-Privacy and security considerations {#privacy-and-security}
-===========================================================
+Security considerations {#security}
+===================================
 
-<p class="issue">TODO: fill this in</p>
+Type confusion {#type-confusion}
+--------------------------------
+
+Like other resources, it is possible that the `/.well-known/traffic-advice` path could be used for a request with some other destination (e.g., as a script). If interpreted as JavaScript, the JSON data would either be syntactically invalid or an empty block. More generally, this specification requires the use of a MIME type that is not used for any other purpose, and standard countermeasures (e.g., `X-Content-Type-Options: nosniff`) can be used to prevent type confusion in some cases which are permissive of mismatched MIME types.
+
+Caching issues {#security-caching}
+----------------------------------
+
+Because the traffic advice resource is expected to be cached by [=traffic advice respecting agents=] such as private prefetch proxies, it is possible that a temporary compromise of an origin server or its private key could be extended to a longer outage of some traffic due to an agent caching a policy that prevents or throttles traffic, leading to a denial of service for such traffic. This is similar to attacks against HTTP Public Key Pinning [[RFC7469]].
+
+This is less of an issue if the traffic is non-essential (e.g., prefetch) traffic.
+
+To mitigate this, well-behaved agents implement a maximum freshness lifetime when they [=fetch traffic advice=].
+
+Request amplification {#request-amplification}
+----------------------------------------------
+
+Agents which are proxy services accessible to untrusted users (esp. the general public) may be susceptible to being used to amplify a denial of service attack conducted, for example, by a botnet. For example, if a small request from a client (e.g. `CONNECT target.example:443` with small headers) can cause a larger request (e.g., `GET /.well-known/traffic-advice` with large headers) to the origin server, this could be used to increase the effective bandwidth available to the distributed denial of service attack against an origin server.
+
+To mitigate this, well-behaved agents implement, in addition to other anti-abuse measures, a minimum freshness lifetime when they [=fetch traffic advice=].
+
+Privacy considerations {#privacy}
+=================================
+
+This specification provides general mechanisms for agents to limit the traffic they are sending. Most privacy considerations are expected to be particular to the agents in question (for example, proxies inspecting traffic they carry).
+
+If privacy considerations related to the traffic advice mechanism itself are identified, they should be added here.
 
 IANA considerations {#iana}
 ===========================
@@ -229,9 +270,9 @@ This document defines the [=MIME type=] `application/trafficadvice+json` as desc
 :  Encoding considerations
 :: Always UTF-8
 :  Security considerations
-:: <p class="issue">TODO: fill this in</p>
+:: See [Security considerations](#security).
 :  Interoperability considerations
-:: <p class="issue">TODO: fill this in</p>
+:: This MIME type is not known to be in previous use. Applications which can process `application/json` should be able to process all valid data with this MIME type.
 :  Published specification
 :: This document
 :  Applications that use this media type
