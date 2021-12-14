@@ -1269,7 +1269,7 @@ Possible extra rowspan handling
 	ul.index ul,
 	ul.index dl { font-size: smaller; }
 	@media not print {
-		ul.index li span:not(.dfn-paneled) {
+		ul.index li a + span {
 			white-space: nowrap;
 			color: transparent; }
 		ul.index li a:hover + span,
@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version d7036035b, updated Fri Oct 8 17:07:11 2021 -0700" name="generator">
+  <meta content="Bikeshed version cace53f8c, updated Tue Dec 7 12:12:54 2021 -0800" name="generator">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1943,7 +1943,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Traffic Advice</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-11-01">1 November 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2021-12-14">14 December 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -1955,7 +1955,7 @@ dfn > a.self-link::before      { content: "#"; }
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 1 November 2021,
+In addition, as of 14 December 2021,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2122,7 +2122,7 @@ Parts of this work may be from another specification document.  If so, those par
         <p>Run <var>whenComplete</var> with <var>parseResult</var>.</p>
       </ol>
      <li data-md>
-      <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch" id="ref-for-concept-fetch">Fetch</a> <var>request</var> with <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response" id="ref-for-process-response">processResponse</a></i> set to <var>processResponse</var> and <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response-end-of-body" id="ref-for-process-response-end-of-body">processResponseEndOfBody</a></i> set to <var>processResponseEndOfBody</var>.</p>
+      <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch" id="ref-for-concept-fetch">Fetch</a> <var>request</var> with <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response" id="ref-for-process-response">processResponse</a></i> set to <var>processResponse</var> and <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-processresponseendofbody" id="ref-for-fetch-processresponseendofbody">processResponseEndOfBody</a></i> set to <var>processResponseEndOfBody</var>.</p>
       <div class="advisement"> Notwithstanding the usual behavior of <a data-link-type="biblio" href="#biblio-http-caching">[HTTP-CACHING]</a>, agents (especially ones shared amongst multiple users) should consider applying a minimum freshness lifetime (10 minutes is suggested) and maximum freshness lifetime (48 hours is suggested) in order to balance the <a href="#security">security considerations</a> discussed below. If these suggested values are used, a default freshness lifetime (if none is specified) of 30 minutes may be appropriate. </div>
     </ol>
    </section>
@@ -2468,10 +2468,10 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#ref-for-process-response">5. Fetching</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-process-response-end-of-body">
-   <a href="https://fetch.spec.whatwg.org/#process-response-end-of-body">https://fetch.spec.whatwg.org/#process-response-end-of-body</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-fetch-processresponseendofbody">
+   <a href="https://fetch.spec.whatwg.org/#fetch-processresponseendofbody">https://fetch.spec.whatwg.org/#fetch-processresponseendofbody</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-process-response-end-of-body">5. Fetching</a>
+    <li><a href="#ref-for-fetch-processresponseendofbody">5. Fetching</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-request-redirect-mode">
@@ -2694,7 +2694,7 @@ Parts of this work may be from another specification document.  If so, those par
      <li><span class="dfn-paneled" id="term-for-null-body-status">null body status</span>
      <li><span class="dfn-paneled" id="term-for-ok-status">ok status</span>
      <li><span class="dfn-paneled" id="term-for-process-response">processresponse</span>
-     <li><span class="dfn-paneled" id="term-for-process-response-end-of-body">processresponseendofbody</span>
+     <li><span class="dfn-paneled" id="term-for-fetch-processresponseendofbody">processresponseendofbody</span>
      <li><span class="dfn-paneled" id="term-for-concept-request-redirect-mode">redirect mode</span>
      <li><span class="dfn-paneled" id="term-for-redirect-status">redirect status</span>
      <li><span class="dfn-paneled" id="term-for-concept-request">request</span>
