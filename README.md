@@ -89,9 +89,18 @@ Prefetches should not reveal any local state that can be used to identify the us
 Specifically:
 * Cookies must not be sent on prefetches.
 * Prefetches must use an isolated network context that does not reveal state from the HTTP cache, previous TLS sessions, etc.
-* Static fingerprinting surfaces such as User-Agent must be bucketed, e.g., only specifiying the major version of the browser.
+* Static fingerprinting surfaces such as User-Agent must be bucketed, e.g., by reducing the [User-Agent](https://www.chromium.org/updates/ua-reduction).
 
-In addition, prefetches should not persist any state (cookies, HTTP caching) unless the user navigates to the prefetched link. 
+In addition, prefetches should not persist any state (cookies, HTTP caching) unless the user navigates to the prefetched link.
+
+The following headers will be sent on prefetch requests:
+
+    purpose: prefetch
+    user-agent: <reduced>
+    accept-encoding: gzip, deflate, br
+    accept-language: <user's languages>
+    sec-ch-ua: <latest stable release>
+    sec-ch-ua-mobile: ?<0 or 1>
 
 ### What to prefetch
 Our experiment found that fetching the mainframe HTML, along with statically linked CSS and synchronous Javascript, provided a 40% LCP improvement at the median. Fetching other resources, for example images, may further improve user experience at the cost of more wasted bytes on mispredictions. All prefetches carry the "Purpose: prefetch" header so origins can identify them. 
