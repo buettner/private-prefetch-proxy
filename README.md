@@ -70,11 +70,7 @@ Users can opt-out of the feature at any time. Furthermore, users can temporarily
 #### Publisher opt-out
 Publishers can opt out by disallowing connections in their [traffic advice](traffic-advice.md). This advice would be fetched and cached by the proxy, and can be used by publishers by adding a single resource to their origin at a well-known path.
 
-Another option for origin-wide opt-out is to leverage the publisher's DNS record:
-* Publishers specify in their DNS entry that they are opting out of proxied prefetching (completely or with some TBD granularity if necessary). 
-* The DNS check would be done by the proxy for privacy reasons; issuing a DNS request from the browser before navigation would share prefetch information with the DNS resolver and potentially the target host. 
-
-In addition, publishers can opt-out for individual requests, for example, when dealing with temporary traffic spikes or other issues. Publishers should look for the `Purpose: prefetch` request header and respond with an HTTP 403 (Forbidden) (see [Geolocation](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
+In addition, publishers can opt-out for individual requests, for example, when dealing with temporary traffic spikes or other issues. Publishers should look for the `Purpose: prefetch` or the new ['Sec-Purpose: prefetch; anonymous-client-ip'](https://wicg.github.io/nav-speculation/prefetch.html#sec-purpose-header) request header and respond with an HTTP 403 (Forbidden) (see [location](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
 
 ### Future opportunities
 We’re continuing to explore ways to safely prefetch via proxies not operated by the browser. In that case, referrers may wish to specify which (if any) proxies they trust with their user data. The *speculation rules* approach offers a flexible pattern which would allow for this extension.
@@ -96,6 +92,7 @@ In addition, prefetches should not persist any state (cookies, HTTP caching) unl
 The following headers will be sent on prefetch requests:
 
     purpose: prefetch
+    sec-purpose: prefetch; anonymous-client-ip
     user-agent: <reduced>
     accept-encoding: gzip, deflate, br
     accept-language: <user's languages>
@@ -103,7 +100,7 @@ The following headers will be sent on prefetch requests:
     sec-ch-ua-mobile: ?<0 or 1>
 
 ### What to prefetch
-Our experiment found that fetching the mainframe HTML, along with statically linked CSS and synchronous Javascript, provided a 40% LCP improvement at the median. Fetching other resources, for example images, may further improve user experience at the cost of more wasted bytes on mispredictions. All prefetches carry the "Purpose: prefetch" header so origins can identify them. 
+Our experiment found that fetching the mainframe HTML, along with statically linked CSS and synchronous Javascript, provided a 40% LCP improvement at the median. Fetching other resources, for example images, may further improve user experience at the cost of more wasted bytes on mispredictions. 
 
 # FAQ
 ## TLS key leaks and private prefetch proxies
@@ -154,7 +151,7 @@ We’re also considering schemes for authentication, and website operators can a
 The destination server will see the IP of the proxy egress IP, not the user's IP; this may interfere with IP-based geolocation. 
 Servers that rely on geolocation to determine what content to serve have the following options:
 * Determine the location of the user at navigation time, e.g., by triggering a request via JS.
-* Reject requests with the "Purpose: prefetch" header for resources that are georestricted.
+* Reject requests with the "Purpose: prefetch" or the new ['Sec-Purpose: prefetch; anonymous-client-ip'](https://wicg.github.io/nav-speculation/prefetch.html#sec-purpose-header) header for resources that are georestricted.
 
 More speculative ideas worth exploring are:
 * Requiring proxies to only egress traffic from IPs in the same country/region as the user. The challenge here is having agreement on the granularity of "region", as proxies likely can't egress in every country.
