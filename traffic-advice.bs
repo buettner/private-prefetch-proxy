@@ -58,6 +58,8 @@ Definitions {#dfns}
 A <dfn>traffic advice entry</dfn> is a [=struct=] with the following [=struct/items=]:
 *  <dfn for="traffic advice entry">disallowed flag</dfn>, a [=boolean=] which is initially false
    <div class="note">If the [=traffic advice entry/disallowed flag=] is true, the advice requests that traffic, including establishing connections and sending requests, be avoided.</div>
+*  <dfn for="traffic advice entry">fraction</dfn>, a number which is at least 0 and at most 1, initially 1
+   <div class="note">The advice requests that only that fraction of traffic be permitted. A server might use this to facilitate an incremental rollout, or to partially reduce server load during peak times.</div>
 
 A <dfn>traffic advice result</dfn> is null, a [=traffic advice entry=], or `"unreachable"`.
 
@@ -189,6 +191,12 @@ To <dfn>parse traffic advice</dfn> from a [=string=] |string| given [=agent iden
 
 1.  If |bestMatch|[`"disallow"`] [=map/exists=] and is true, then set |entry|'s [=traffic advice entry/disallowed flag=] to true.
 
+1.  If |bestMatch|[`"fraction"`] [=map/exists=] and is a number, then:
+
+    1. Let |fraction| be |bestMatch|[`"fraction"`].
+
+    1. If |fraction| is greater than or equal to 0 and less than or equal to 1, then set |entry|'s [=traffic advice entry/fraction=] to |fraction|.
+
 1.  Return |entry|.
 
 </section>
@@ -203,6 +211,16 @@ If the result is null, then no advice was received. Agents should adopt their de
 If the result is `"unreachable"`, then the HTTP server was not able to service the request for traffic advice. Since this could indicate that the server cannot accept additional requests at this time, agents may stop traffic to the server for some interval.
 
 If the result's [=traffic advice entry/disallowed flag=] is true, then the HTTP server advises that traffic is discouraged at this time. Agents should respect this by not establishing new connections or sending new requests.
+
+Otherwise, if the result's [=traffic advice entry/fraction=] is less than 1, then the HTTP server advises that it would like to receive only a fraction of the possible traffic. Agents may implement this as they see fit, but the following algorithm is suggested on establishment of an HTTP connection on behalf of a client.
+
+1.  Choose a uniform random number |r| between 0 and 1.
+1.  If |r| is less than or equal to the result's [=traffic advice entry/fraction=], then the traffic is permitted by the fraction.
+1.  Otherwise, a connection is not established.
+
+This process should not be repeated as part of automatic retry logic, since this would defeat the server's ability to shed load in this manner. Broadly, agents should aim for a fraction of 0.1 to result in approximately 10% of the traffic to the HTTP server.
+
+This approach allows servers to scale their traffic proportionally as part of an incremental rollout. Agents should avoid approaches which might bias the permitted connections or requests in ways that might make this scaling non-linear (e.g., by preferring certain kinds of connection or user).
 
 Security considerations {#security}
 ===================================
