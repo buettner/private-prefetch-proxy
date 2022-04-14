@@ -121,24 +121,26 @@ To <dfn>fetch traffic advice</dfn> for [=origin=] |origin|, [=agent identity=] |
     :: `"manual"`
         <div class="note">This means that a [=redirect status=] will not lead to another origin being contacted.</div>
 
+1.  Let |fetchController| be null.
+
 1.  Let |processResponse| be the following steps, given [=response=] |response|:
 
-    1.  If |response|'s [=response/type=] is `"error"`, then [=fetch/terminate=] the fetch, run |whenComplete| with `"unreachable"`, and return.
+    1.  If |response|'s [=response/type=] is `"error"`, then [=fetch controller/terminate=] |fetchController|, run |whenComplete| with `"unreachable"`, and return.
 
-    1.  If |response|'s [=response/type=] is `"opaqueredirect"`, then [=fetch/terminate=] the fetch, run |whenComplete| with null, and return.
+    1.  If |response|'s [=response/type=] is `"opaqueredirect"`, then [=fetch controller/terminate=] |fetchController|, run |whenComplete| with null, and return.
 
     1.  [=Assert=]: |response|'s [=response/type=] is `"basic"`.
 
-    1.  If |response|'s [=response/status=] is 429 (Too Many Requests; see [[RFC6585]]) or 503 (Service Unavailable; see [[HTTP-SEMANTICS]]), then [=fetch/terminate=] the fetch, run |whenComplete| with `"unreachable"`, and return.
+    1.  If |response|'s [=response/status=] is 429 (Too Many Requests; see [[RFC6585]]) or 503 (Service Unavailable; see [[HTTP-SEMANTICS]]), then [=fetch controller/terminate=] |fetchController|, run |whenComplete| with `"unreachable"`, and return.
         <div class="note">If present, the [[HTTP-SEMANTICS]] `Retry-After` response header could be used as a hint about when to next retry.</div>
 
-    1.  If |response|'s [=response/status=] is not an [=ok status=], then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
+    1.  If |response|'s [=response/status=] is not an [=ok status=], then [=fetch controller/terminate=] |fetchController|, run |whenComplete| with null and return.
 
-    1.  If |response|'s [=response/status=] is a [=null body status=], then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
+    1.  If |response|'s [=response/status=] is a [=null body status=], then [=fetch controller/terminate=] |fetchController|, run |whenComplete| with null and return.
 
     1.  Let |mimeType| be the result of [=header list/extracting a MIME type=] from |response|'s [=response/header list=].
 
-    1.  If |mimeType| is failure or its [=MIME type/essence=] is not `"application/trafficadvice+json"`, then [=fetch/terminate=] the fetch, run |whenComplete| with null and return.
+    1.  If |mimeType| is failure or its [=MIME type/essence=] is not `"application/trafficadvice+json"`, then [=fetch controller/terminate=] |fetchController|, run |whenComplete| with null and return.
 
 1.  Let |processResponseEndOfBody| be the following steps, given [=response=] |response| and null, failure or [=byte sequence=] |body|:
 
@@ -150,7 +152,7 @@ To <dfn>fetch traffic advice</dfn> for [=origin=] |origin|, [=agent identity=] |
 
     1.  Run |whenComplete| with |parseResult|.
 
-1.  [=Fetch=] |request| with <i>[=fetch/processResponse=]</i> set to |processResponse| and <i>[=fetch/processResponseEndOfBody=]</i> set to |processResponseEndOfBody|.
+1.  [=Fetch=] |request| with <i>[=fetch/processResponse=]</i> set to |processResponse| and <i>[=fetch/processResponseEndOfBody=]</i> set to |processResponseEndOfBody|, and set |fetchController| to the result.
 
     <div class="advisement">
         Notwithstanding the usual behavior of [[HTTP-CACHING]], agents (especially ones shared amongst multiple users) should consider applying a minimum freshness lifetime (10 minutes is suggested) and maximum freshness lifetime (48 hours is suggested) in order to balance the [security considerations](#security) discussed below. If these suggested values are used, a default freshness lifetime (if none is specified) of 30 minutes may be appropriate.
