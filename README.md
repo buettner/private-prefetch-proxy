@@ -94,6 +94,7 @@ The following headers will be sent on prefetch requests:
     purpose: prefetch
     sec-purpose: prefetch; anonymous-client-ip
     user-agent: <reduced>
+    accept: <default value>
     accept-encoding: gzip, deflate, br
     accept-language: <user's languages>
     sec-ch-ua: <latest stable release>
