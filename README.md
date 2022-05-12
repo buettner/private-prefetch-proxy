@@ -68,7 +68,7 @@ Where:
 Users can opt-out of the feature at any time. Furthermore, users can temporarily opt-out of the feature by using their browser’s private browsing mode.
 
 #### Publisher opt-out
-Publishers can opt out by disallowing connections in their [traffic advice](https://buettner.github.io/private-prefetch-proxy/traffic-advice.html). This advice would be fetched and cached by the proxy, and can be used by publishers by adding a single resource to their origin at a well-known path.
+Publishers can opt out by disallowing connections in their [traffic advice](traffic-advice.md). This advice would be fetched and cached by the proxy, and can be used by publishers by adding a single resource to their origin at a well-known path.
 
 In addition, publishers can opt-out for individual requests, for example, when dealing with temporary traffic spikes or other issues. Publishers should look for the `Purpose: prefetch` or the new ['Sec-Purpose: prefetch; anonymous-client-ip'](https://wicg.github.io/nav-speculation/prefetch.html#sec-purpose-header) request header and respond with an HTTP 403 (Forbidden) (see [location](https://github.com/buettner/private-prefetch-proxy#geolocation) for an example use case).
 
