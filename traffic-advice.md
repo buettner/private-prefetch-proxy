@@ -2,7 +2,7 @@
 
 Publishers may wish not to accept traffic from [private prefetch proxies](README.md) and other sources other than direct user traffic, for instance to reduce server load due to speculative prefetch activity.
 
-We propose a well-known "traffic advice" resource, analogous to `/robots.txt` (for web crawlers), which allows an HTTP server to declare that implementing agents should stop sending traffic to it for some time.
+We propose a well-known "traffic advice" resource, analogous to `/robots.txt` (for web crawlers), which allows an HTTP server to declare that implementing agents should stop sending traffic to it for some time. The formal traffic-advice specification can be found [here](https://buettner.github.io/private-prefetch-proxy/traffic-advice.html).
 
 ## Proposal
 
@@ -28,7 +28,6 @@ Each agent has a series of identifiers it recognizes, in order of specificity:
 
 It finds the most specific element of the response, and applies the corresponding advice (currently only a boolean which advises disallowing all traffic) to its behavior. The agent should respect the cache-related response headers to minimize the frequency of such requests and to revalidate the resource when it is stale.
 
-Currently the only advice is the key `"disallow"`, which specifies a boolean which, if present and `true`, advises the agent not to establish connections to the origin. In the future other advice may be added.
 
 If the response has a `404 Not Found` status (or a similar status), on the other hand, the agent should apply its default behavior.
 
