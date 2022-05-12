@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 2e3c4c68b, updated Fri Jan 14 14:49:00 2022 -0800" name="generator">
+  <meta content="Bikeshed version fb1e763a4, updated Tue Mar 1 13:13:50 2022 -0800" name="generator">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -1943,7 +1943,7 @@ dfn > a.self-link::before      { content: "#"; }
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Traffic Advice</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2022-02-08">8 February 2022</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2022-05-12">12 May 2022</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Issue Tracking:
@@ -1955,7 +1955,7 @@ dfn > a.self-link::before      { content: "#"; }
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" height="15" src="https://licensebuttons.net/p/zero/1.0/80x15.png" width="80"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 8 February 2022,
+In addition, as of 12 May 2022,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -2020,6 +2020,9 @@ Parts of this work may be from another specification document.  If so, those par
     <li data-md>
      <p><dfn class="dfn-paneled" data-dfn-for="traffic advice entry" data-dfn-type="dfn" data-noexport id="traffic-advice-entry-disallowed-flag">disallowed flag</dfn>, a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#boolean" id="ref-for-boolean">boolean</a> which is initially false</p>
      <div class="note" role="note">If the <a data-link-type="dfn" href="#traffic-advice-entry-disallowed-flag" id="ref-for-traffic-advice-entry-disallowed-flag">disallowed flag</a> is true, the advice requests that traffic, including establishing connections and sending requests, be avoided.</div>
+    <li data-md>
+     <p><dfn class="dfn-paneled" data-dfn-for="traffic advice entry" data-dfn-type="dfn" data-noexport id="traffic-advice-entry-fraction">fraction</dfn>, a number which is at least 0 and at most 1, initially 1</p>
+     <div class="note" role="note">The advice requests that only that fraction of traffic be permitted. A server might use this to facilitate an incremental rollout, or to partially reduce server load during peak times.</div>
    </ul>
    <p>A <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="traffic-advice-result">traffic advice result</dfn> is null, a <a data-link-type="dfn" href="#traffic-advice-entry" id="ref-for-traffic-advice-entry">traffic advice entry</a>, or <code>"unreachable"</code>.</p>
    <p>An <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport id="agent-identity">agent identity</dfn> is a <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#list" id="ref-for-list">list</a> of <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#string" id="ref-for-string">strings</a>. It must contain at least two elements, and the last must be <code>"*"</code>.</p>
@@ -2089,25 +2092,27 @@ Parts of this work may be from another specification document.  If so, those par
         <div class="note" role="note">This means that a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#redirect-status" id="ref-for-redirect-status">redirect status</a> will not lead to another origin being contacted.</div>
       </dl>
      <li data-md>
+      <p>Let <var>fetchController</var> be null.</p>
+     <li data-md>
       <p>Let <var>processResponse</var> be the following steps, given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response">response</a> <var>response</var>:</p>
       <ol>
        <li data-md>
-        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type">type</a> is <code>"error"</code>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch-terminate" id="ref-for-concept-fetch-terminate">terminate</a> the fetch, run <var>whenComplete</var> with <code>"unreachable"</code>, and return.</p>
+        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type">type</a> is <code>"error"</code>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-controller-terminate" id="ref-for-fetch-controller-terminate">terminate</a> <var>fetchController</var>, run <var>whenComplete</var> with <code>"unreachable"</code>, and return.</p>
        <li data-md>
-        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type①">type</a> is <code>"opaqueredirect"</code>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch-terminate" id="ref-for-concept-fetch-terminate①">terminate</a> the fetch, run <var>whenComplete</var> with null, and return.</p>
+        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type①">type</a> is <code>"opaqueredirect"</code>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-controller-terminate" id="ref-for-fetch-controller-terminate①">terminate</a> <var>fetchController</var>, run <var>whenComplete</var> with null, and return.</p>
        <li data-md>
         <p><a data-link-type="dfn" href="https://infra.spec.whatwg.org/#assert" id="ref-for-assert">Assert</a>: <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-type" id="ref-for-concept-response-type②">type</a> is <code>"basic"</code>.</p>
        <li data-md>
-        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-status" id="ref-for-concept-response-status">status</a> is 429 (Too Many Requests; see <a data-link-type="biblio" href="#biblio-rfc6585">[RFC6585]</a>) or 503 (Service Unavailable; see <a data-link-type="biblio" href="#biblio-http-semantics">[HTTP-SEMANTICS]</a>), then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch-terminate" id="ref-for-concept-fetch-terminate②">terminate</a> the fetch, run <var>whenComplete</var> with <code>"unreachable"</code>, and return.</p>
+        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-status" id="ref-for-concept-response-status">status</a> is 429 (Too Many Requests; see <a data-link-type="biblio" href="#biblio-rfc6585">[RFC6585]</a>) or 503 (Service Unavailable; see <a data-link-type="biblio" href="#biblio-http-semantics">[HTTP-SEMANTICS]</a>), then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-controller-terminate" id="ref-for-fetch-controller-terminate②">terminate</a> <var>fetchController</var>, run <var>whenComplete</var> with <code>"unreachable"</code>, and return.</p>
         <div class="note" role="note">If present, the <a data-link-type="biblio" href="#biblio-http-semantics">[HTTP-SEMANTICS]</a> <code>Retry-After</code> response header could be used as a hint about when to next retry.</div>
        <li data-md>
-        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-status" id="ref-for-concept-response-status①">status</a> is not an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#ok-status" id="ref-for-ok-status">ok status</a>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch-terminate" id="ref-for-concept-fetch-terminate③">terminate</a> the fetch, run <var>whenComplete</var> with null and return.</p>
+        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-status" id="ref-for-concept-response-status①">status</a> is not an <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#ok-status" id="ref-for-ok-status">ok status</a>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-controller-terminate" id="ref-for-fetch-controller-terminate③">terminate</a> <var>fetchController</var>, run <var>whenComplete</var> with null and return.</p>
        <li data-md>
-        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-status" id="ref-for-concept-response-status②">status</a> is a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#null-body-status" id="ref-for-null-body-status">null body status</a>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch-terminate" id="ref-for-concept-fetch-terminate④">terminate</a> the fetch, run <var>whenComplete</var> with null and return.</p>
+        <p>If <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-status" id="ref-for-concept-response-status②">status</a> is a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#null-body-status" id="ref-for-null-body-status">null body status</a>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-controller-terminate" id="ref-for-fetch-controller-terminate④">terminate</a> <var>fetchController</var>, run <var>whenComplete</var> with null and return.</p>
        <li data-md>
         <p>Let <var>mimeType</var> be the result of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-extract-mime-type" id="ref-for-concept-header-extract-mime-type">extracting a MIME type</a> from <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-header-list" id="ref-for-concept-response-header-list">header list</a>.</p>
        <li data-md>
-        <p>If <var>mimeType</var> is failure or its <a data-link-type="dfn" href="https://mimesniff.spec.whatwg.org/#mime-type-essence" id="ref-for-mime-type-essence">essence</a> is not <code>"application/trafficadvice+json"</code>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch-terminate" id="ref-for-concept-fetch-terminate⑤">terminate</a> the fetch, run <var>whenComplete</var> with null and return.</p>
+        <p>If <var>mimeType</var> is failure or its <a data-link-type="dfn" href="https://mimesniff.spec.whatwg.org/#mime-type-essence" id="ref-for-mime-type-essence">essence</a> is not <code>"application/trafficadvice+json"</code>, then <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-controller-terminate" id="ref-for-fetch-controller-terminate⑤">terminate</a> <var>fetchController</var>, run <var>whenComplete</var> with null and return.</p>
       </ol>
      <li data-md>
       <p>Let <var>processResponseEndOfBody</var> be the following steps, given <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response" id="ref-for-concept-response①">response</a> <var>response</var> and null, failure or <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#byte-sequence" id="ref-for-byte-sequence">byte sequence</a> <var>body</var>:</p>
@@ -2122,7 +2127,7 @@ Parts of this work may be from another specification document.  If so, those par
         <p>Run <var>whenComplete</var> with <var>parseResult</var>.</p>
       </ol>
      <li data-md>
-      <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch" id="ref-for-concept-fetch">Fetch</a> <var>request</var> with <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response" id="ref-for-process-response">processResponse</a></i> set to <var>processResponse</var> and <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-processresponseendofbody" id="ref-for-fetch-processresponseendofbody">processResponseEndOfBody</a></i> set to <var>processResponseEndOfBody</var>.</p>
+      <p><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-fetch" id="ref-for-concept-fetch">Fetch</a> <var>request</var> with <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#process-response" id="ref-for-process-response">processResponse</a></i> set to <var>processResponse</var> and <i><a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#fetch-processresponseendofbody" id="ref-for-fetch-processresponseendofbody">processResponseEndOfBody</a></i> set to <var>processResponseEndOfBody</var>, and set <var>fetchController</var> to the result.</p>
       <div class="advisement"> Notwithstanding the usual behavior of <a data-link-type="biblio" href="#biblio-http-caching">[HTTP-CACHING]</a>, agents (especially ones shared amongst multiple users) should consider applying a minimum freshness lifetime (10 minutes is suggested) and maximum freshness lifetime (48 hours is suggested) in order to balance the <a href="#security">security considerations</a> discussed below. If these suggested values are used, a default freshness lifetime (if none is specified) of 30 minutes may be appropriate. </div>
     </ol>
    </section>
@@ -2157,6 +2162,14 @@ Parts of this work may be from another specification document.  If so, those par
      <li data-md>
       <p>If <var>bestMatch</var>[<code>"disallow"</code>] <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists①">exists</a> and is true, then set <var>entry</var>’s <a data-link-type="dfn" href="#traffic-advice-entry-disallowed-flag" id="ref-for-traffic-advice-entry-disallowed-flag①">disallowed flag</a> to true.</p>
      <li data-md>
+      <p>If <var>bestMatch</var>[<code>"fraction"</code>] <a data-link-type="dfn" href="https://infra.spec.whatwg.org/#map-exists" id="ref-for-map-exists②">exists</a> and is a number, then:</p>
+      <ol>
+       <li data-md>
+        <p>Let <var>fraction</var> be <var>bestMatch</var>[<code>"fraction"</code>].</p>
+       <li data-md>
+        <p>If <var>fraction</var> is greater than or equal to 0 and less than or equal to 1, then set <var>entry</var>’s <a data-link-type="dfn" href="#traffic-advice-entry-fraction" id="ref-for-traffic-advice-entry-fraction">fraction</a> to <var>fraction</var>.</p>
+      </ol>
+     <li data-md>
       <p>Return <var>entry</var>.</p>
     </ol>
    </section>
@@ -2165,6 +2178,17 @@ Parts of this work may be from another specification document.  If so, those par
    <p>If the result is null, then no advice was received. Agents should adopt their default behavior.</p>
    <p>If the result is <code>"unreachable"</code>, then the HTTP server was not able to service the request for traffic advice. Since this could indicate that the server cannot accept additional requests at this time, agents may stop traffic to the server for some interval.</p>
    <p>If the result’s <a data-link-type="dfn" href="#traffic-advice-entry-disallowed-flag" id="ref-for-traffic-advice-entry-disallowed-flag②">disallowed flag</a> is true, then the HTTP server advises that traffic is discouraged at this time. Agents should respect this by not establishing new connections or sending new requests.</p>
+   <p>Otherwise, if the result’s <a data-link-type="dfn" href="#traffic-advice-entry-fraction" id="ref-for-traffic-advice-entry-fraction①">fraction</a> is less than 1, then the HTTP server advises that it would like to receive only a fraction of the possible traffic. Agents may implement this as they see fit, but the following algorithm is suggested on establishment of an HTTP connection on behalf of a client.</p>
+   <ol>
+    <li data-md>
+     <p>Choose a uniform random number <var>r</var> between 0 and 1.</p>
+    <li data-md>
+     <p>If <var>r</var> is less than or equal to the result’s <a data-link-type="dfn" href="#traffic-advice-entry-fraction" id="ref-for-traffic-advice-entry-fraction②">fraction</a>, then the traffic is permitted by the fraction.</p>
+    <li data-md>
+     <p>Otherwise, a connection is not established.</p>
+   </ol>
+   <p>This process should not be repeated as part of automatic retry logic, since this would defeat the server’s ability to shed load in this manner. Broadly, agents should aim for a fraction of 0.1 to result in approximately 10% of the traffic to the HTTP server.</p>
+   <p>This approach allows servers to scale their traffic proportionally as part of an incremental rollout. Agents should avoid approaches which might bias the permitted connections or requests in ways that might make this scaling non-linear (e.g., by preferring certain kinds of connection or user).</p>
    <h2 class="heading settled" data-level="8" id="security"><span class="secno">8. </span><span class="content">Security considerations</span><a class="self-link" href="#security"></a></h2>
    <h3 class="heading settled" data-level="8.1" id="type-confusion"><span class="secno">8.1. </span><span class="content">Type confusion</span><a class="self-link" href="#type-confusion"></a></h3>
    <p>Like other resources, it is possible that the <code>/.well-known/traffic-advice</code> path could be used for a request with some other destination (e.g., as a script). If interpreted as JavaScript, the JSON data would either be syntactically invalid or an empty block. More generally, this specification requires the use of a MIME type that is not used for any other purpose, and standard countermeasures (e.g., <code>X-Content-Type-Options: nosniff</code>) can be used to prevent type confusion in some cases which are permissive of mismatched MIME types.</p>
@@ -2396,6 +2420,7 @@ Parts of this work may be from another specification document.  If so, those par
    <li><a href="#agent-identity">agent identity</a><span>, in § 3</span>
    <li><a href="#traffic-advice-entry-disallowed-flag">disallowed flag</a><span>, in § 3</span>
    <li><a href="#fetch-traffic-advice">fetch traffic advice</a><span>, in § 5</span>
+   <li><a href="#traffic-advice-entry-fraction">fraction</a><span>, in § 3</span>
    <li><a href="#generate-a-traffic-advice-url">generate a traffic advice URL</a><span>, in § 5</span>
    <li><a href="#parse-traffic-advice">parse traffic advice</a><span>, in § 6</span>
    <li><a href="#traffic-advice-entry">traffic advice entry</a><span>, in § 3</span>
@@ -2504,10 +2529,10 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#ref-for-concept-response-status">5. Fetching</a> <a href="#ref-for-concept-response-status①">(2)</a> <a href="#ref-for-concept-response-status②">(3)</a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="term-for-concept-fetch-terminate">
-   <a href="https://fetch.spec.whatwg.org/#concept-fetch-terminate">https://fetch.spec.whatwg.org/#concept-fetch-terminate</a><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="term-for-fetch-controller-terminate">
+   <a href="https://fetch.spec.whatwg.org/#fetch-controller-terminate">https://fetch.spec.whatwg.org/#fetch-controller-terminate</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-concept-fetch-terminate">5. Fetching</a> <a href="#ref-for-concept-fetch-terminate①">(2)</a> <a href="#ref-for-concept-fetch-terminate②">(3)</a> <a href="#ref-for-concept-fetch-terminate③">(4)</a> <a href="#ref-for-concept-fetch-terminate④">(5)</a> <a href="#ref-for-concept-fetch-terminate⑤">(6)</a>
+    <li><a href="#ref-for-fetch-controller-terminate">5. Fetching</a> <a href="#ref-for-fetch-controller-terminate①">(2)</a> <a href="#ref-for-fetch-controller-terminate②">(3)</a> <a href="#ref-for-fetch-controller-terminate③">(4)</a> <a href="#ref-for-fetch-controller-terminate④">(5)</a> <a href="#ref-for-fetch-controller-terminate⑤">(6)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-concept-response-type">
@@ -2579,7 +2604,7 @@ Parts of this work may be from another specification document.  If so, those par
   <aside class="dfn-panel" data-for="term-for-map-exists">
    <a href="https://infra.spec.whatwg.org/#map-exists">https://infra.spec.whatwg.org/#map-exists</a><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-map-exists">6. Parsing</a> <a href="#ref-for-map-exists①">(2)</a>
+    <li><a href="#ref-for-map-exists">6. Parsing</a> <a href="#ref-for-map-exists①">(2)</a> <a href="#ref-for-map-exists②">(3)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="term-for-list-iterate">
@@ -2700,7 +2725,7 @@ Parts of this work may be from another specification document.  If so, those par
      <li><span class="dfn-paneled" id="term-for-concept-request">request</span>
      <li><span class="dfn-paneled" id="term-for-concept-response">response</span>
      <li><span class="dfn-paneled" id="term-for-concept-response-status">status</span>
-     <li><span class="dfn-paneled" id="term-for-concept-fetch-terminate">terminated</span>
+     <li><span class="dfn-paneled" id="term-for-fetch-controller-terminate">terminate</span>
      <li><span class="dfn-paneled" id="term-for-concept-response-type">type</span>
      <li><span class="dfn-paneled" id="term-for-concept-request-url">url</span>
     </ul>
@@ -2806,6 +2831,13 @@ Parts of this work may be from another specification document.  If so, those par
     <li><a href="#ref-for-traffic-advice-entry-disallowed-flag">3. Definitions</a>
     <li><a href="#ref-for-traffic-advice-entry-disallowed-flag①">6. Parsing</a>
     <li><a href="#ref-for-traffic-advice-entry-disallowed-flag②">7. Interpretation</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="traffic-advice-entry-fraction">
+   <b><a href="#traffic-advice-entry-fraction">#traffic-advice-entry-fraction</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-traffic-advice-entry-fraction">6. Parsing</a>
+    <li><a href="#ref-for-traffic-advice-entry-fraction①">7. Interpretation</a> <a href="#ref-for-traffic-advice-entry-fraction②">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="traffic-advice-result">
